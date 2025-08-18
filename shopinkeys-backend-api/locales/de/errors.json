@@ -1,0 +1,6 @@
+{
+  "unauthorized": "Unbefugter Zugriff.",
+  "forbidden": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen.",
+  "not_found": "Die angeforderte Ressource wurde nicht gefunden.",
+  "internal_server": "Ein unerwarteter Fehler ist aufgetreten."
+}

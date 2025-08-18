@@ -1,0 +1,6 @@
+{
+  "unauthorized": "未經授權的訪問。",
+  "forbidden": "您無權訪問此資源。",
+  "not_found": "找不到請求的資源。",
+  "internal_server": "發生意外錯誤。"
+}

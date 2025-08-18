@@ -1,0 +1,44 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Ignore logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+
+# Build output
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Miscellaneous
+*.sublime-workspace
+
+# Ignore createAdmin script
+scripts/createAdmin.js
+

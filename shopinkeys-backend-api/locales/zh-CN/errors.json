@@ -1,0 +1,6 @@
+{
+  "unauthorized": "未经授权的访问。",
+  "forbidden": "您无权访问此资源。",
+  "not_found": "找不到请求的资源。",
+  "internal_server": "发生意外错误。"
+}

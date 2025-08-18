@@ -1,0 +1,6 @@
+{
+  "unauthorized": "Acceso no autorizado.",
+  "forbidden": "No tienes permiso para acceder a este recurso.",
+  "not_found": "No se encontró el recurso solicitado.",
+  "internal_server": "Ocurrió un error inesperado."
+}
