@@ -1,10 +1,10 @@
-# ShopInKeys
+# Shopinkeys
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-green)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/mongodb-%3E%3D5.0-green)](https://www.mongodb.com/)
 
-ShopInKeys is a cutting-edge **Amazon Affiliate and wellness technology platform** that helps users integrate technology into their fitness and wellness journeys. The platform offers product reviews, comparisons, insights, health tips, and trending tech updates.
+Shopinkeys is a cutting-edge **Amazon Affiliate and wellness technology platform** that helps users integrate technology into their fitness and wellness journeys. The platform offers product reviews, comparisons, insights, health tips, and trending tech updates.
 
 ## Features
 
@@ -110,7 +110,7 @@ Developed and maintained by **Light Ikoyo** – [LinkedIn](https://www.linkedin.
 
 ---
 
-Elevate your wellness tech journey with ShopInKeys 🚀
+Elevate your wellness tech journey with Shopinkeys 
 
 ```
 
