@@ -51,10 +51,10 @@ const registerUser = async ({ name, username, email, password }) => {
       html: verificationEmailTemplate(user.name, verificationUrl),
     });
 
-    // Log verification token for test purposes
-    console.log("=== Verification Token ===");
-    console.log(verificationToken);
-    console.log("==========================");
+    // // Log verification token for test purposes
+    // console.log("=== Verification Token ===");
+    // console.log(verificationToken);
+    // console.log("==========================");
 
     // Return friendly message
     return {
@@ -141,9 +141,9 @@ const generatePasswordResetToken = async (email) => {
     const resetToken = crypto.randomBytes(32).toString("hex");
 
      // Log token for testing
-    console.log("=== Password Reset Token ===");
-    console.log(resetToken);
-    console.log("============================");
+    // console.log("=== Password Reset Token ===");
+    // console.log(resetToken);
+    // console.log("============================");
 
     user.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
     user.passwordResetExpires = Date.now() + 3600000; // 1 hour
