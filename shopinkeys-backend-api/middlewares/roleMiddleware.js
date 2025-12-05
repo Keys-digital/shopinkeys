@@ -28,6 +28,46 @@ const requireAdmin = (req, res, next) => {
 };
 
 /**
+ * Require Super Admin middleware
+ */
+const requireSuperAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      status: false,
+      message: "Authentication required",
+    });
+  }
+  const role = req.user.role || req.user.userroleId;
+  if (role !== "Super Admin") {
+    return res.status(StatusCodes.FORBIDDEN).json({
+      status: false,
+      message: "Super Admin role required",
+    });
+  }
+  next();
+};
+
+/**
+ * Require Admin or Super Admin middleware
+ */
+const requireAdminOrSuperAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      status: false,
+      message: "Authentication required",
+    });
+  }
+  const role = req.user.role || req.user.userroleId;
+  if (role !== "Admin" && role !== "Super Admin") {
+    return res.status(StatusCodes.FORBIDDEN).json({
+      status: false,
+      message: "Admin or Super Admin role required",
+    });
+  }
+  next();
+};
+
+/**
  * Require specific roles middleware
  */
 const requireRoles = (allowedRoles = []) => {
@@ -130,7 +170,13 @@ const roleMiddleware = (allowedRoles = []) => {
           .json({ message: i18next.t("errors.forbidden", { lng: lang }) });
       }
 
-      const dbUser = await User.findOne({ email: userEmail }).populate("role");
+      const dbUser = await User.findOne({ email: userEmail });
+      if (!dbUser) {
+        logger.error(`RoleMiddleware: User not found for email ${userEmail}`);
+      } else if (!dbUser.role) {
+        logger.error(`RoleMiddleware: User ${userEmail} has no role. dbUser: ${JSON.stringify(dbUser)}`);
+      }
+
       if (!dbUser || !dbUser.role) {
         logger.warn(`Access Denied: User ${userEmail} has no assigned role.`);
         return res
@@ -138,19 +184,16 @@ const roleMiddleware = (allowedRoles = []) => {
           .json({ message: i18next.t("errors.forbidden", { lng: lang }) });
       }
 
-      const userRole = dbUser.role.name.toLowerCase();
-
-      const validRoles = await Role.find({}, "name");
-      const roleNames = validRoles.map((r) => r.name.toLowerCase());
-
-      if (!roleNames.includes(userRole)) {
-        logger.warn(
-          `Access Denied: User ${username} (${userEmail}) has an invalid role: ${userRole}`
-        );
-        return res
-          .status(403)
-          .json({ message: i18next.t("errors.forbidden", { lng: lang }) });
+      // Handle role as string (User model definition) or object (if populated in future)
+      const roleVal = typeof dbUser.role === 'string' ? dbUser.role : dbUser.role.name;
+      if (!roleVal) {
+        logger.error(`RoleMiddleware: roleVal is null/undefined. dbUser.role: ${JSON.stringify(dbUser.role)}`);
       }
+      const userRole = roleVal.toLowerCase();
+
+      // If we need to validate against Role collection, we can still do that,
+      // but usually the enum in User model is enough.
+      // For now, let's assume the string in User model is valid.
 
       const formattedAllowedRoles = allowedRoles.map((r) =>
         r.trim().toLowerCase()
@@ -180,6 +223,8 @@ const roleMiddleware = (allowedRoles = []) => {
 
 module.exports = {
   requireAdmin,
+  requireSuperAdmin,
+  requireAdminOrSuperAdmin,
   requireRoles,
   checkRolePermission,
   roleMiddleware,

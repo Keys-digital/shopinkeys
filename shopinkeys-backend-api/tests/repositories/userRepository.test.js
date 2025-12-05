@@ -25,11 +25,9 @@ describe("User Repository", () => {
     it("should return null if an error occurs", async () => {
       User.findOne.mockRejectedValue(new Error("Database error"));
 
-      const result = await userRepository.findOne({
+      await expect(userRepository.findOne({
         email: "fail@example.com",
-      });
-
-      expect(result).toBeNull();
+      })).rejects.toThrow("Database error");
     });
   });
 
@@ -57,11 +55,9 @@ describe("User Repository", () => {
         populate: jest.fn().mockRejectedValue(new Error("Database error")),
       });
 
-      const result = await userRepository.findUserAndRole({
+      await expect(userRepository.findUserAndRole({
         email: "fail@example.com",
-      });
-
-      expect(result).toBeNull();
+      })).rejects.toThrow("Database error");
     });
   });
 
@@ -85,11 +81,9 @@ describe("User Repository", () => {
         .fn()
         .mockRejectedValue(new Error("Database error"));
 
-      const result = await userRepository.createUser({
+      await expect(userRepository.createUser({
         email: "fail@example.com",
-      });
-
-      expect(result).toBeNull();
+      })).rejects.toThrow("Database error");
     });
   });
 
@@ -114,12 +108,10 @@ describe("User Repository", () => {
     it("should return null if an error occurs", async () => {
       User.findOneAndUpdate.mockRejectedValue(new Error("Database error"));
 
-      const result = await userRepository.updateUser(
+      await expect(userRepository.updateUser(
         { email: "fail@example.com" },
         { email: "updated@example.com" }
-      );
-
-      expect(result).toBeNull();
+      )).rejects.toThrow("Database error");
     });
   });
 });

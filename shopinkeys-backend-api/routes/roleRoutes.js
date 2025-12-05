@@ -8,12 +8,12 @@ const router = express.Router();
 
 /**
  * Assign role to user
- * - Only Admins can do this
+ * - Only Super Admins and Admins can do this
  */
 router.post(
   "/assign",
   authenticateUser,
-  roleMiddleware(["Admin"]),
+  roleMiddleware(["Super Admin", "Admin"]),
   validateRoleAssignment,
   roleHandlers.assignRoleToUser
 );

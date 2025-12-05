@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./.env" });
+// require("dotenv").config({ path: "./.env" }); // Handled in config/envConfig.js
 const app = require("./app");
 const winston = require("./utils/logger");
 const { PORT } = require("./config/envConfig");

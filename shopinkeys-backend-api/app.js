@@ -5,6 +5,9 @@ const morgan = require("morgan");
 const winston = require("./utils/logger");
 const authRoutes = require("./routes/authRoutes");
 const roleRoutes = require("./routes/roleRoutes");
+const oauthRoutes = require("./routes/oauthRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const passport = require("./config/passport");
 const { notFound, errorHandler } = require("./middlewares/handler");
 
 //  Import i18next & middleware
@@ -21,13 +24,20 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
 
 // Logging middleware
 app.use(morgan("combined", { stream: winston.stream }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", oauthRoutes);
 app.use("/api/roles", roleRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/collaborator", require("./routes/collaboratorRoutes"));
+app.use("/api/blog-posts", require("./routes/blogPostRoutes"));
+app.use("/api/share-requests", require("./routes/shareRequestRoutes"));
+app.use("/api/notifications", require("./routes/notificationRoutes"));
 
 app.get("/", (req, res) => {
   res.status(200).send("API is running...");

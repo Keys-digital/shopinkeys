@@ -13,7 +13,7 @@ const registerSchema = Joi.object({
   username: Joi.string()
     .min(3)
     .max(30)
-    .pattern(/^[a-zA-Z0-9_-]+$/) 
+    .pattern(/^[a-zA-Z0-9_-]+$/)
     .required()
     .messages({
       "string.empty": "Username is required",
@@ -74,11 +74,11 @@ const resetPasswordSchema = Joi.object({
   token: Joi.string().required().messages({
     "string.empty": "Reset token is required",
   }),
-  newPassword: Joi.string()
+  password: Joi.string()
     .min(8)
     .max(32)
     .pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/)
-    .required()
+    .optional()
     .messages({
       "string.empty": "New password is required",
       "string.min": "Password must be at least 8 characters",
@@ -86,7 +86,19 @@ const resetPasswordSchema = Joi.object({
       "string.pattern.base":
         "Password must contain at least one uppercase letter, one number, and one special character",
     }),
-});
+  newPassword: Joi.string()
+    .min(8)
+    .max(32)
+    .pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/)
+    .optional()
+    .messages({
+      "string.empty": "New password is required",
+      "string.min": "Password must be at least 8 characters",
+      "string.max": "Password must be at most 32 characters",
+      "string.pattern.base":
+        "Password must contain at least one uppercase letter, one number, and one special character",
+    }),
+}).or('password', 'newPassword');
 
 // Reusable validation middleware
 const validateReqBody = (schema) => async (req, res, next) => {
@@ -101,9 +113,21 @@ const validateReqBody = (schema) => async (req, res, next) => {
     req.body = validatedBody;
     next();
   } catch (error) {
+    // Map Joi error types to i18n keys
+    const firstError = error.details[0];
+    let message;
+
+    // Map specific Joi error types to i18n keys
+    if (firstError.type === "string.email") {
+      message = "validation.email_invalid";
+    } else {
+      // For other errors, use the custom message from Joi schema
+      message = firstError.message;
+    }
+
     return res.status(400).json({
       success: false,
-      message: error.details.map((detail) => detail.message).join(", "),
+      message: message,
     });
   }
 };
