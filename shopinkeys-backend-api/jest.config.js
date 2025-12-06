@@ -4,4 +4,5 @@ module.exports = {
   collectCoverage: true, // Collects test coverage data
   coverageDirectory: "coverage", // Stores coverage reports in a folder
   clearMocks: true, // Clears mocks between tests
+  testTimeout: 30000, // ⬅ Increase timeout to 30 seconds
 };

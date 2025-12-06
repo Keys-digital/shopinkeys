@@ -53,7 +53,7 @@ describe("Auth Middleware", () => {
 
       User.findById.mockResolvedValue({
         _id: "123",
-        isVerified: false,
+        isEmailVerified: false,
         email: "test@example.com",
       });
 
@@ -74,7 +74,7 @@ describe("Auth Middleware", () => {
 
       User.findById.mockResolvedValue({
         _id: "123",
-        isVerified: true,
+        isEmailVerified: true,
         email: "test@example.com",
       });
 

@@ -10,6 +10,20 @@ exports.findOne = async (filter) => {
   }
 };
 
+exports.findUser = async (filter) => {
+  try {
+    // Handle both 'id' and '_id' filter properties
+    if (filter.id) {
+      filter._id = filter.id;
+      delete filter.id;
+    }
+    return await User.findOne(filter);
+  } catch (error) {
+    winston.error(`Error finding user: ${error.message}`);
+    throw error;
+  }
+};
+
 exports.findUserAndRole = async (filter) => {
   try {
     return await User.findOne(filter).populate("role", "name").lean();

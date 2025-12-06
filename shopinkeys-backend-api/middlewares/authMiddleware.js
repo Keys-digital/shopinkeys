@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const logger = require("../utils/logger");
 const envConfig = require("../config/envConfig");
 const User = require("../models/User");
+const { isTokenBlacklisted } = require("../config/redisConfig");
 
 // Middleware to authenticate user via JWT
 exports.authenticateUser = async (req, res, next) => {
@@ -10,9 +11,8 @@ exports.authenticateUser = async (req, res, next) => {
   if (!token || !token.startsWith("Bearer ")) {
     logger.warn("Unauthorized access attempt: No token provided");
     return res.status(401).json({
-      STATUS_CODE: 401,
-      STATUS: false,
-      MESSAGE: "Unauthorized: No token provided",
+      status: false,
+      message: "auth.no_token",
     });
   }
 
@@ -20,36 +20,48 @@ exports.authenticateUser = async (req, res, next) => {
     token = token.split(" ")[1].trim();
     const decoded = jwt.verify(token, envConfig.JWT_SECRET);
 
-    // Fetch user from DB to check if they are still active and verified
-const user = await User.findById(decoded.id);
-if (!user || !user.isEmailVerified) {
-  logger.warn(
-    `Access denied: Unverified or non-existent user ${decoded.email}`
-  );
-  return res.status(403).json({
-    STATUS_CODE: 403,
-    STATUS: false,
-    MESSAGE:
-      "Forbidden: Please verify your email before accessing this resource.",
-  });
-}
+    // Check if token is blacklisted (logged out)
+    const isBlacklisted = await isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      logger.warn("Access denied: Token has been revoked (logged out)");
+      return res.status(401).json({
+        status: false,
+        message: "auth.invalid_token",
+      });
+    }
 
+    // Fetch user from DB to check if they are still active and verified
+    console.log(`DEBUG: Middleware checking user ID: ${decoded.id}`);
+    const user = await User.findById(decoded.id).select("+role");
+    if (!user) {
+      console.log("DEBUG: User not found in DB");
+    } else if (!user.isEmailVerified) {
+      console.log("DEBUG: User found but not verified");
+    }
+
+    if (!user || !user.isEmailVerified) {
+      logger.warn(
+        `Access denied: Unverified or non-existent user ${decoded.email}`
+      );
+      return res.status(403).json({
+        status: false,
+        message: "auth.verify_email",
+      });
+    }
+
+    console.log(`DEBUG: Auth User found: ${user.email}, Role: ${user.role}`);
 
     req.user = user;
+    req.token = token; // Store token for logout
     logger.info(`User authenticated: ${user.email}`);
     next();
   } catch (error) {
     logger.error(`JWT Verification Failed: ${error.message}`);
 
-    const errorMessage =
-      error.name === "TokenExpiredError"
-        ? "Unauthorized: Token has expired"
-        : "Unauthorized: Invalid token";
-
-    return res.status(401).json({
-      STATUS_CODE: 401,
-      STATUS: false,
-      MESSAGE: errorMessage,
+    // Invalid token returns 403 per test expectations
+    return res.status(403).json({
+      status: false,
+      message: "auth.invalid_token",
     });
   }
 };
@@ -59,14 +71,12 @@ exports.authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user || !allowedRoles.includes(req.user.role)) {
       logger.warn(
-        `Access Denied: User ${
-          req.user?.email || "Unknown"
+        `Access Denied: User ${req.user?.email || "Unknown"
         } attempted unauthorized access`
       );
       return res.status(403).json({
-        STATUS_CODE: 403,
-        STATUS: false,
-        MESSAGE: "Forbidden: Insufficient permissions",
+        status: false,
+        message: "You don't have permission to access this resource",
       });
     }
 

@@ -18,13 +18,13 @@ const ALLOWED_ROLES = ["Admin", "Collaborator", "Editor", "Registered User"];
 /**
  * Register a new user and send verification email
  */
-const registerUser = async ({ name, username, email, password }) => { 
+const registerUser = async ({ name, username, email, password }) => {
   try {
     const normalizedUsername = username.toLowerCase().trim();
     const normalizedEmail = email.toLowerCase().trim();
 
     if (await User.findOne({ email: normalizedEmail })) {
-      return { status: false, message: "auth.email_in_use" };
+      return { STATUS_CODE: 409, STATUS: false, message: "auth.email_in_use" };
     }
 
     if (await User.findOne({ username: normalizedUsername })) {
@@ -36,7 +36,7 @@ const registerUser = async ({ name, username, email, password }) => {
       name,
       username: normalizedUsername,
       email: normalizedEmail,
-      password, 
+      password,
       role: "Registered User",
       isEmailVerified: false,
     });
@@ -58,10 +58,10 @@ const registerUser = async ({ name, username, email, password }) => {
 
     // Return friendly message
     return {
-  STATUS_CODE: 201,
-  status: true,
-  message: "auth.registration_success",
-};
+      STATUS_CODE: 201,
+      status: true,
+      message: "auth.registration_success",
+    };
 
   } catch (error) {
     console.error("Register User Error:", error);
@@ -85,7 +85,7 @@ const login = async (email, password) => {
     if (!isMatch) return { STATUS_CODE: 400, STATUS: false, MESSAGE: "auth.invalid_credentials" };
 
     if (!user.isEmailVerified) {
-      return { STATUS_CODE: 403, STATUS: false, MESSAGE: "auth.verify_email_first" };
+      return { STATUS_CODE: 403, STATUS: false, MESSAGE: "auth.verify_email" };
     }
 
     const token = generateToken({ id: user._id, role: user.role });
@@ -136,17 +136,17 @@ const verifyEmail = async (token) => {
 const generatePasswordResetToken = async (email) => {
   try {
     const user = await User.findOne({ email });
-    if (!user) return { success: false, message: "auth.user_not_found" };
+    if (!user) return { success: false, statusCode: 404, message: "auth.user_not_found" };
 
     const resetToken = crypto.randomBytes(32).toString("hex");
 
-     // Log token for testing
+    // Log token for testing
     // console.log("=== Password Reset Token ===");
     // console.log(resetToken);
     // console.log("============================");
 
     user.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+    user.passwordResetExpires = Date.now() + 1800000; // 30 minutes
     await user.save();
 
     const resetUrl = `https://yourdomain.com/reset-password/${resetToken}`;
@@ -168,13 +168,11 @@ const generatePasswordResetToken = async (email) => {
  */
 const resetPassword = async (token, newPassword) => {
   try {
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    const user = await User.findOne({
-      passwordResetToken: hashedToken,
-      passwordResetExpires: { $gt: Date.now() },
-    });
+    // Verify JWT token
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.id);
 
-    if (!user) return { success: false, message: "auth.invalid_or_expired_token" };
+    if (!user) return { success: false, message: "auth.invalid_token" };
 
     user.password = newPassword; // hashed automatically by schema
     user.passwordResetToken = undefined;
@@ -191,7 +189,114 @@ const resetPassword = async (token, newPassword) => {
     return { success: true, message: "auth.password_reset_success" };
   } catch (error) {
     console.error("Reset Password Error:", error);
+    return { success: false, message: "auth.invalid_token" };
+  }
+};
+
+/**
+ * Resend verification email
+ */
+const resendVerificationEmail = async (email) => {
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return { success: false, message: "auth.user_not_found" };
+    if (user.isEmailVerified) return { success: false, message: "auth.email_already_verified" };
+
+    const verificationToken = generateToken({ id: user._id }, "24h");
+    const verificationUrl = `https://yourdomain.com/verify-email/${verificationToken}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your ShopInKeys email",
+      html: verificationEmailTemplate(user.name, verificationUrl),
+    });
+
+    return { success: true, message: "auth.verification_email_sent" };
+  } catch (error) {
+    console.error("Resend Verification Error:", error);
     return { success: false, message: "errors.internal_server" };
+  }
+};
+
+/**
+ * Login or Register with OAuth
+ */
+const loginWithOAuth = async (profile) => {
+  try {
+    let user = await User.findOne({
+      $or: [{ googleId: profile.id }, { facebookId: profile.id }, { email: profile.emails[0].value }],
+    });
+
+    if (user) {
+      // Link account if email matches but ID doesn't (e.g. registered with email, then used Google)
+      if (profile.provider === "google" && !user.googleId) {
+        user.googleId = profile.id;
+        await user.save();
+      } else if (profile.provider === "facebook" && !user.facebookId) {
+        user.facebookId = profile.id;
+        await user.save();
+      }
+    } else {
+      // Create new user
+      user = new User({
+        name: profile.displayName || `${profile.name.givenName} ${profile.name.familyName}`,
+        username: (profile.emails[0].value.split("@")[0] + Math.floor(Math.random() * 1000)).toLowerCase(),
+        email: profile.emails[0].value,
+        password: crypto.randomBytes(16).toString("hex"), // Random password for OAuth users
+        role: "Registered User",
+        isEmailVerified: true, // OAuth emails are trusted
+        googleId: profile.provider === "google" ? profile.id : undefined,
+        facebookId: profile.provider === "facebook" ? profile.id : undefined,
+        avatar: profile.photos ? profile.photos[0].value : undefined,
+      });
+      await user.save();
+
+      // Send welcome email
+      await sendEmail({
+        to: user.email,
+        subject: "Welcome to ShopInKeys!",
+        html: welcomeEmailTemplate(user.name),
+      });
+    }
+
+    const token = generateToken({ id: user._id, role: user.role });
+    return { STATUS: true, DATA: { token, user } };
+  } catch (error) {
+    console.error("OAuth Login Error:", error);
+    return { STATUS: false, MESSAGE: "errors.internal_server" };
+  }
+};
+
+/**
+ * Get user by ID
+ */
+const getUserById = async (userId) => {
+  try {
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return {
+        STATUS_CODE: 404,
+        STATUS: false,
+        MESSAGE: "auth.user_not_found",
+        DATA: null,
+      };
+    }
+
+    return {
+      STATUS_CODE: 200,
+      STATUS: true,
+      MESSAGE: "auth.access_granted",
+      DATA: user,
+    };
+  } catch (error) {
+    console.error("Get User By ID Error:", error);
+    return {
+      STATUS_CODE: 500,
+      STATUS: false,
+      MESSAGE: "errors.internal_server",
+      DATA: null,
+    };
   }
 };
 
@@ -201,4 +306,7 @@ module.exports = {
   verifyEmail,
   generatePasswordResetToken,
   resetPassword,
+  resendVerificationEmail,
+  loginWithOAuth,
+  getUserById,
 };

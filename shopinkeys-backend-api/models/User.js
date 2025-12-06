@@ -7,13 +7,9 @@ const profileSchema = new mongoose.Schema({
     maxlength: [300, "Bio cannot exceed 300 characters"],
     trim: true,
   },
-  avatar: {
-    type: String,
-    default: "https://example.com/default-avatar.png",
-  },
   socialLinks: {
     type: Map,
-    of: String, // Example: { "twitter": "https://twitter.com/user" }
+    of: String,
   },
 });
 
@@ -50,6 +46,18 @@ const userSchema = new mongoose.Schema(
         "Please enter a valid email address",
       ],
     },
+    googleId: {
+      type: String,
+      select: false,
+    },
+    facebookId: {
+      type: String,
+      select: false,
+    },
+    avatar: {
+      type: String,
+      default: "https://example.com/default-avatar.png",
+    },
     password: {
       type: String,
       required: [true, "Password is required"],
@@ -59,17 +67,9 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["Admin", "Collaborator", "Editor", "Registered User"],
+      enum: ["Super Admin", "Admin", "Collaborator", "Editor", "Registered User", "Guest"],
       required: true,
       default: "Registered User",
-    },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    profile: {
-      type: profileSchema,
-      default: {},
     },
     passwordResetToken: {
       type: String,
@@ -79,6 +79,22 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    promotionStatus: {
+      type: String,
+      enum: ['none', 'pending_promotion', 'accepted', 'declined'],
+      default: 'none',
+    },
+    promotionInitiatedAt: {
+      type: Date,
+    },
+    assignedCategories: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );
@@ -86,6 +102,12 @@ const userSchema = new mongoose.Schema(
 //  Hash password before saving
 userSchema.pre("save", function (next) {
   if (!this.isModified("password")) return next();
+
+  // Check if password is already a bcrypt hash (starts with $2a$, $2b$, or $2y$)
+  if (this.password && /^\$2[aby]\$/.test(this.password)) {
+    return next();
+  }
+
   this.password = bcryptjs.hashSync(this.password, 10);
   next();
 });

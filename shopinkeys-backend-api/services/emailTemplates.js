@@ -61,9 +61,46 @@ const welcomeEmailTemplate = (name) => `
   </div>
 `;
 
-module.exports = { 
-  verificationEmailTemplate, 
-  forgotPasswordEmailTemplate, 
+const collaboratorRequestRejectionTemplate = (name, reviewNotes) => `
+  <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+    <h2>Hello ${name},</h2>
+    <p>Thank you for your interest in becoming a collaborator at ShopInKeys.</p>
+    <p>After careful review, we regret to inform you that your collaborator application has not been approved at this time.</p>
+    ${reviewNotes ? `
+    <div style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #e91e63; margin: 20px 0;">
+      <strong>Feedback from our team:</strong>
+      <p style="margin-top: 10px;">${reviewNotes}</p>
+    </div>
+    ` : ''}
+    <p>We encourage you to continue engaging with our platform and consider reapplying in the future.</p>
+    <p>If you have any questions, please don't hesitate to reach out to our support team.</p>
+    <hr />
+    <p>ShopInKeys Team</p>
+  </div>
+`;
+
+const shareRequestRejectionTemplate = (name, postTitle, reviewNotes) => `
+  <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+    <h2>Hello ${name},</h2>
+    <p>Thank you for your interest in sharing content from ShopInKeys.</p>
+    <p>We regret to inform you that your request to share the post <strong>"${postTitle}"</strong> has been declined by the content creator.</p>
+    ${reviewNotes ? `
+    <div style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #e91e63; margin: 20px 0;">
+      <strong>Message from the creator:</strong>
+      <p style="margin-top: 10px;">${reviewNotes}</p>
+    </div>
+    ` : ''}
+    <p>You may explore other content on our platform or reach out to the creator directly for more information.</p>
+    <hr />
+    <p>ShopInKeys Team</p>
+  </div>
+`;
+
+module.exports = {
+  verificationEmailTemplate,
+  forgotPasswordEmailTemplate,
   passwordResetConfirmationTemplate,
-  welcomeEmailTemplate
+  welcomeEmailTemplate,
+  collaboratorRequestRejectionTemplate,
+  shareRequestRejectionTemplate,
 };

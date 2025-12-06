@@ -1,6 +1,9 @@
 const authService = require("../services/authService");
 const logger = require("../utils/logger");
 const i18next = require("../config/i18nConfig");
+const { blacklistToken } = require("../config/redisConfig");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/envConfig");
 
 // Helper to safely resolve language
 const getLang = (req) =>
@@ -16,7 +19,7 @@ exports.register = async (req, res) => {
   try {
     const data = await authService.registerUser({ name, username, email, password });
 
-    const message = i18next.t(data.message, { lng: lang }); 
+    const message = i18next.t(data.message, { lng: lang });
 
     if (!data.STATUS) {
       logger.warn(`Registration failed for ${email}: ${message}`);
@@ -101,7 +104,8 @@ exports.login = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: i18next.t("auth.login_success", { lng: lang }),
-      data: data.DATA,
+      token: data.DATA.token,
+      user: data.DATA.user,
     });
   } catch (error) {
     logger.error(`Error during login: ${error.message}`);
@@ -130,7 +134,7 @@ exports.forgotPassword = async (req, res) => {
 
     if (!result.success) {
       logger.warn(`Forgot password failed for ${email}: ${result.message}`);
-      return res.status(400).json({
+      return res.status(result.statusCode || 400).json({
         status: false,
         message: i18next.t(result.message, { lng: lang }),
       });
@@ -153,8 +157,10 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   const lang = getLang(req);
   try {
-    const { token, newPassword } = req.body;
-    if (!token || !newPassword) {
+    const { token, newPassword, password } = req.body;
+    const passwordToUse = newPassword || password;
+
+    if (!token || !passwordToUse) {
       logger.warn("Reset password failed: Missing token or newPassword.");
       return res.status(400).json({
         status: false,
@@ -162,7 +168,7 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-    const result = await authService.resetPassword(token, newPassword);
+    const result = await authService.resetPassword(token, passwordToUse);
 
     if (!result.success) {
       logger.warn(`Reset password failed: ${result.message}`);
@@ -189,6 +195,17 @@ exports.resetPassword = async (req, res) => {
 exports.logout = async (req, res) => {
   const lang = getLang(req);
   try {
+    const token = req.token; // Token stored by authMiddleware
+
+    if (token) {
+      // Decode token to get expiration
+      const decoded = jwt.decode(token);
+      const expiresIn = decoded.exp - Math.floor(Date.now() / 1000); // Remaining time in seconds
+
+      // Blacklist token in Redis
+      await blacklistToken(token, expiresIn > 0 ? expiresIn : 3600); // Default 1 hour if expired
+    }
+
     logger.info(`User logged out: ${req.user?.id}`);
     return res.status(200).json({
       status: true,
@@ -222,5 +239,60 @@ exports.getCurrentUser = async (req, res) => {
       status: false,
       message: i18next.t("errors.internal_server", { lng: lang }),
     });
+  }
+};
+
+// Resend Verification Email
+exports.resendVerification = async (req, res) => {
+  const lang = getLang(req);
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: i18next.t("errors.bad_request", { lng: lang }),
+      });
+    }
+
+    const result = await authService.resendVerificationEmail(email);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: i18next.t(result.message, { lng: lang }),
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: i18next.t(result.message, { lng: lang }),
+    });
+  } catch (error) {
+    logger.error(`Error resending verification email: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      message: i18next.t("errors.internal_server", { lng: lang }),
+    });
+  }
+};
+
+// OAuth Callback Handler
+exports.oauthCallback = async (req, res) => {
+  const lang = getLang(req);
+  try {
+    // req.user is populated by passport
+    const data = await authService.loginWithOAuth(req.user);
+
+    if (!data.STATUS) {
+      return res.redirect(`/login?error=${data.MESSAGE}`);
+    }
+
+    // Redirect to frontend with token
+    // In production, use a secure cookie or a temporary code exchange
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    return res.redirect(`${frontendUrl}/auth/callback?token=${data.DATA.token}`);
+  } catch (error) {
+    logger.error(`OAuth Callback Error: ${error.message}`);
+    return res.redirect("/login?error=server_error");
   }
 };
