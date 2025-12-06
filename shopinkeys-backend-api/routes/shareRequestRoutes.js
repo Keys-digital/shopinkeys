@@ -2,6 +2,7 @@ const express = require("express");
 const { authenticateUser } = require("../middlewares/authMiddleware");
 const { roleMiddleware } = require("../middlewares/roleMiddleware");
 const shareRequestController = require("../controllers/shareRequest.controller");
+const { validate, shareRequestSchema } = require("../middlewares/validation");
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ const router = express.Router();
 router.post(
     "/",
     authenticateUser,
+    validate(shareRequestSchema),
     shareRequestController.submitShareRequest
 );
 

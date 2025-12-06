@@ -400,10 +400,10 @@ exports.rejectShareRequest = async (req, res) => {
 };
 
 module.exports = {
-    submitShareRequest,
-    getMyShareRequests,
-    getMySubmissions,
-    getAllShareRequests,
-    approveShareRequest,
-    rejectShareRequest,
+    submitShareRequest: exports.submitShareRequest,
+    getMyShareRequests: exports.getMyShareRequests,
+    getMySubmissions: exports.getMySubmissions,
+    getAllShareRequests: exports.getAllShareRequests,
+    approveShareRequest: exports.approveShareRequest,
+    rejectShareRequest: exports.rejectShareRequest,
 };

@@ -41,6 +41,10 @@ const auditLogSchema = new mongoose.Schema(
                 // Share request management
                 "APPROVE_SHARE_REQUEST",
                 "REJECT_SHARE_REQUEST",
+                // Affiliate product management
+                "APPROVE_AFFILIATE_PRODUCT",
+                "REJECT_AFFILIATE_PRODUCT",
+                "DELETE_AFFILIATE_PRODUCT",
             ],
             required: true,
         },

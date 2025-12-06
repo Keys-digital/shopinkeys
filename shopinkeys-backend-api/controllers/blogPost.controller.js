@@ -2,9 +2,7 @@ const BlogPost = require("../models/BlogPost");
 const PostInteraction = require("../models/PostInteraction");
 const logger = require("../utils/logger");
 const { logAudit } = require("../repositories/auditLogRepository");
-
-const { checkPlagiarism } = require("../utils/plagiarism");
-const { checkKGR } = require("../utils/seo");
+const { postProcessingQueue } = require("../services/postProcessingQueue");
 
 /**
  * Helper: Check for Auto-Approve
@@ -97,31 +95,25 @@ exports.createPost = async (req, res) => {
         });
 
         if (status === "in_review") {
-            // Check for auto-approve
-            // Defaulting to 'seo' type and empty keyword for now as they aren't in req.body yet
-            // In future, these should come from req.body
+            // Enqueue background job for plagiarism/KGR checks
             const type = req.body.type || "seo";
             const mainKeyword = req.body.mainKeyword || "";
 
-            if (await checkAutoApprove(content, featuredImage, type, mainKeyword, media)) {
-                newPost.status = "approved";
-                newPost.editorFeedback = "Auto-approved by system (met quality criteria).";
-                newPost.reviewedBy = null; // System approved
+            // Set initial status to processing
+            newPost.status = "in_review";
+            await newPost.save();
 
-                await logAudit({
-                    userId: req.user._id, // Logged under user's action but noted as system
-                    action: "AUTO_APPROVE_POST",
-                    targetUserId: req.user._id,
-                    details: `Auto-approved post: ${title}`,
-                    ipAddress: req.ip,
-                    userAgent: req.get("User-Agent"),
-                });
-            } else {
-                newPost.status = "in_review";
-            }
+            // Enqueue background job (non-blocking)
+            await postProcessingQueue.add("process-post", {
+                postId: newPost._id.toString(),
+                content,
+                keyword: mainKeyword,
+            });
+
+            logger.info(`Post ${newPost._id} enqueued for processing`);
+        } else {
+            await newPost.save();
         }
-
-        await newPost.save();
 
         logger.info(`Blog post created by user: ${req.user.email}`);
 
@@ -162,6 +154,27 @@ exports.updatePost = async (req, res) => {
                 STATUS_CODE: 404,
                 STATUS: false,
                 MESSAGE: "Blog post not found.",
+            });
+        }
+
+        // CRITICAL: Collaborators can only update their own posts
+        // Editors/Admins should use approve/reject workflow, not direct edits
+        if (req.user.role === "Collaborator" && post.authorId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({
+                STATUS_CODE: 403,
+                STATUS: false,
+                MESSAGE: "You can only update your own posts.",
+            });
+        }
+
+        // Editors and Admins should not directly edit post content
+        // They should use the approve/reject workflow
+        if ((req.user.role === "Editor" || req.user.role === "Admin" || req.user.role === "Super Admin") &&
+            post.authorId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({
+                STATUS_CODE: 403,
+                STATUS: false,
+                MESSAGE: "Editors and Admins cannot directly edit posts. Use the approve/reject workflow instead.",
             });
         }
 
@@ -429,10 +442,60 @@ exports.rejectPost = async (req, res) => {
 };
 
 /**
+ * Get all public posts (published)
+ * GET /api/blog-posts/public
+ * Access: Public
+ */
+exports.getAllPublicPosts = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, category, tag } = req.query;
+
+        // Build filter for published posts only
+        const filter = { status: "published" };
+        if (category) filter.category = category;
+        if (tag) filter.tags = tag;
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const posts = await BlogPost.find(filter)
+            .select("title slug excerpt featuredImage publishedAt category tags")
+            .populate("authorId", "name username")
+            .sort({ publishedAt: -1 })
+            .skip(skip)
+            .limit(parseInt(limit));
+
+        const total = await BlogPost.countDocuments(filter);
+
+        res.status(200).json({
+            STATUS_CODE: 200,
+            STATUS: true,
+            MESSAGE: "Public posts retrieved successfully.",
+            DATA: {
+                posts,
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(total / parseInt(limit)),
+                    totalPosts: total,
+                    limit: parseInt(limit),
+                },
+            },
+        });
+    } catch (error) {
+        logger.error(`Error fetching public posts: ${error.message}`);
+        res.status(500).json({
+            STATUS_CODE: 500,
+            STATUS: false,
+            MESSAGE: "Internal server error.",
+        });
+    }
+};
+
+/**
  * Get public post by slug
  * GET /api/blog-posts/public/:slug
  * Access: Public
  */
+
 exports.getPostBySlug = async (req, res) => {
     try {
         const { slug } = req.params;
@@ -447,28 +510,47 @@ exports.getPostBySlug = async (req, res) => {
             });
         }
 
-        // Track view
+        // Track view with deduplication (6-hour window)
         // Ideally this should be async or handled by a separate service to not block response
         // For MVP, we'll do it here but catch errors so it doesn't fail the request
         try {
             const PostInteraction = require("../models/PostInteraction");
-            // Check if user is logged in (optional for views)
             const userId = req.user ? req.user._id : null;
+            const ipAddress = req.ip;
 
-            // Enhanced view tracking
-            const refSource = req.query.ref || req.get("Referer") || "direct";
-            const country = req.get("CF-IPCountry") || "Unknown"; // Cloudflare header or similar
-
-            const newView = new PostInteraction({
+            // Check for recent view from same IP or user (6-hour deduplication window)
+            const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+            const query = {
                 postId: post._id,
-                userId: userId,
                 type: "view",
-                ipAddress: req.ip,
-                userAgent: req.get("User-Agent"),
-                refSource: refSource,
-                country: country,
-            });
-            await newView.save();
+                createdAt: { $gte: sixHoursAgo },
+            };
+
+            // Check by IP address or userId (whichever is available)
+            if (userId) {
+                query.userId = userId;
+            } else {
+                query.ipAddress = ipAddress;
+            }
+
+            const existingView = await PostInteraction.findOne(query);
+
+            // Only track if no recent view found
+            if (!existingView) {
+                const refSource = req.query.ref || req.get("Referer") || "direct";
+                const country = req.get("CF-IPCountry") || "Unknown"; // Cloudflare header or similar
+
+                const newView = new PostInteraction({
+                    postId: post._id,
+                    userId: userId,
+                    type: "view",
+                    ipAddress: ipAddress,
+                    userAgent: req.get("User-Agent"),
+                    refSource: refSource,
+                    country: country,
+                });
+                await newView.save();
+            }
         } catch (viewError) {
             logger.error(`Error tracking view: ${viewError.message}`);
         }
@@ -535,6 +617,15 @@ exports.uploadMedia = async (req, res) => {
  */
 exports.likePost = async (req, res) => {
     try {
+        // Check if user is authenticated
+        if (!req.user) {
+            return res.status(401).json({
+                STATUS_CODE: 401,
+                STATUS: false,
+                MESSAGE: "You must be logged in to like posts",
+            });
+        }
+
         const { id } = req.params;
 
         const post = await BlogPost.findById(id);
@@ -591,6 +682,15 @@ exports.likePost = async (req, res) => {
  */
 exports.ratePost = async (req, res) => {
     try {
+        // Check if user is authenticated
+        if (!req.user) {
+            return res.status(401).json({
+                STATUS_CODE: 401,
+                STATUS: false,
+                MESSAGE: "You must be logged in to rate posts",
+            });
+        }
+
         const { id } = req.params;
         const { rating } = req.body;
 
@@ -652,6 +752,15 @@ exports.ratePost = async (req, res) => {
  */
 exports.commentOnPost = async (req, res) => {
     try {
+        // Check if user is authenticated
+        if (!req.user) {
+            return res.status(401).json({
+                STATUS_CODE: 401,
+                STATUS: false,
+                MESSAGE: "You must be logged in to comment on posts",
+            });
+        }
+
         const { id } = req.params;
         const { comment } = req.body;
 
