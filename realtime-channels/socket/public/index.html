@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WKForce Realtime Chat Simulation</title>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+
+    <script>
+      window.SOCKET_URL = "http://localhost:4000";
+      window.DEBUG = true;
+    </script>
+  </head>
+
+  <body>
+    <button class="toggle-sidebar-btn" id="toggleSidebar">☰ Channels</button>
+
+    <div class="sidebar">
+      <header>
+        <img
+          src="/assets/wkforceLogo.png"
+          alt="WKForce Logo"
+          onerror="this.style.display='none'"
+        />
+        <h2>COMMS-CHANNELS</h2>
+      </header>
+
+      <div class="connection-status">
+        <div id="socketio-status">
+          <span class="status-dot disconnected"></span>
+          <span class="status-text">Disconnected</span>
+        </div>
+      </div>
+
+      <div class="channels-scroll-area">
+        <!-- Connect form -->
+        <div class="connect-section" id="connect-section">
+          <input type="hidden" id="userId" />
+          <input id="userName" placeholder="Your Name" />
+          <input id="receiverName" placeholder="Receiver (optional)" />
+          <button id="connectBtn">Connect</button>
+        </div>
+
+        <div class="channels-section">
+          <h3>Direct Messages</h3>
+          <div class="channels" id="direct-channels">
+            <ul id="direct-channel-list"></ul>
+          </div>
+
+          <h3 class="group-channels-title">Group Channels</h3>
+          <div class="channels" id="group-channels">
+            <ul id="group-channel-list"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-area">
+      <div class="chat-header">
+        <h3 id="chat-title">Select a channel to start chatting</h3>
+        <p id="connected-user"></p>
+        <div id="unread-indicator"></div>
+      </div>
+
+      <div id="messages" class="messages">
+        <div class="system-message">
+          Welcome to COMMS-CHANNELS! Connect and select a channel to start
+          messaging.
+        </div>
+      </div>
+
+      <div id="typing-indicator" class="typing-indicator"></div>
+
+      <div class="input-area">
+        <button class="icon-btn" id="emoji-btn" title="Emoji" disabled>
+          😊
+        </button>
+        <button class="icon-btn" id="attach-btn" title="Attach file" disabled>
+          📎
+        </button>
+
+        <div class="input-container">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Type a message... (Connect and select a channel first)"
+            maxlength="500"
+            disabled
+          />
+          <button class="icon-btn" id="plus-btn" title="More options" disabled>
+            ➕
+          </button>
+          <button class="icon-btn" id="video-btn" title="Send video" disabled>
+            🎥
+          </button>
+          <input
+            type="file"
+            id="video-file-input"
+            accept="video/*"
+            style="display: none"
+          />
+        </div>
+        <div
+          id="plus-menu"
+          class="plus-menu"
+          style="display: none; position: absolute"
+        >
+          <button class="plus-option" data-type="contact">
+            👤 Send Contact
+          </button>
+          <button class="plus-option" data-type="poll">📊 Poll</button>
+          <button class="plus-option" data-type="location">📍 Location</button>
+        </div>
+
+        <button id="send-btn" disabled>
+          <span class="send-icon">➤</span>
+          <span class="voice-icon">🎤</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- AUDIO Recording Overlay -->
+    <div
+      id="audio-recording-overlay"
+      class="recording-overlay"
+      style="display: none"
+    >
+      <div class="recording-box">
+        <div class="recording-indicator"></div>
+        <p id="audio-recording-text">Recording voice message...</p>
+        <button id="cancel-audio-recording">Stop Recording</button>
+      </div>
+    </div>
+
+    <!-- VIDEO Recording Overlay -->
+    <div
+      id="video-recording-overlay"
+      class="recording-overlay video"
+      style="display: none"
+    >
+      <video id="recording-preview" autoplay muted></video>
+      <div class="recording-box">
+        <div class="recording-indicator"></div>
+        <p id="video-recording-text">Recording video message...</p>
+        <button id="cancel-video-recording">Stop Recording</button>
+      </div>
+    </div>
+
+    <!-- POLL CREATION MODAL -->
+    <div id="poll-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Create a Poll</h3>
+        <input
+          type="text"
+          id="poll-question"
+          placeholder="Enter your question"
+        />
+
+        <div id="poll-options">
+          <input type="text" placeholder="Option 1" class="poll-option" />
+          <input type="text" placeholder="Option 2" class="poll-option" />
+        </div>
+
+        <button id="add-option-btn">➕ Add Option</button>
+
+        <div class="modal-actions">
+          <button id="cancel-poll-btn">Cancel</button>
+          <button id="send-poll-btn">Send Poll</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced initialization script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const messageInput = document.getElementById("message-input");
+        const sendBtn = document.getElementById("send-btn");
+        const connectBtn = document.getElementById("connectBtn");
+        const toggleSidebarBtn = document.getElementById("toggleSidebar");
+        const userNameInput = document.getElementById("userName");
+        const receiverNameInput = document.getElementById("receiverName");
+
+        // Handle send button mode switching
+        messageInput.addEventListener("input", function () {
+          if (this.value.trim().length > 0) {
+            sendBtn.classList.add("send-mode");
+          } else {
+            sendBtn.classList.remove("send-mode");
+          }
+        });
+
+        // Handle Enter key in inputs
+        userNameInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") connectBtn.click();
+        });
+
+        receiverNameInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") connectBtn.click();
+        });
+
+        // Connect button functionality
+        connectBtn.addEventListener("click", function () {
+          const userName = userNameInput.value.trim();
+          const receiverName = receiverNameInput.value.trim();
+
+          if (userName) {
+            // Enable message input
+            messageInput.disabled = false;
+            messageInput.placeholder = "Type a message...";
+
+            // Update connection status
+            const statusDot = document.querySelector(".status-dot");
+            const statusText = document.querySelector(".status-text");
+            statusDot.classList.remove("disconnected");
+            statusDot.classList.add("connected");
+            statusText.textContent = "Connected";
+
+            // Update chat title and user info
+            document.getElementById("chat-title").textContent = "General Chat";
+            let userInfo = `Connected as: ${userName}`;
+            if (receiverName) {
+              userInfo += ` | To: ${receiverName}`;
+            }
+            document.getElementById("connected-user").textContent = userInfo;
+
+            // Enable buttons
+            document.getElementById("emoji-btn").disabled = false;
+            document.getElementById("attach-btn").disabled = false;
+            document.getElementById("video-btn").disabled = false;
+            sendBtn.disabled = false;
+
+            window.connectSocketSimple?.(userNameInput.value.trim());
+
+            // Focus on message input
+            messageInput.focus();
+          } else {
+            alert("Please enter your name to connect");
+            userNameInput.focus();
+          }
+        });
+
+        // Send button functionality
+        sendBtn.addEventListener("click", function () {
+          if (sendBtn.classList.contains("send-mode")) {
+            const message = messageInput.value.trim();
+            if (message) {
+              window.addMessage?.(message, "text");
+
+              messageInput.value = "";
+              sendBtn.classList.remove("send-mode");
+            }
+          } else {
+            // Start voice recording
+            console.log("Starting voice recording...");
+            document.getElementById("audio-recording-overlay").style.display =
+              "flex";
+          }
+        });
+
+        // Cancel audio recording
+        document
+          .getElementById("cancel-audio-recording")
+          .addEventListener("click", function () {
+            document.getElementById("audio-recording-overlay").style.display =
+              "none";
+            console.log("Voice recording stopped");
+          });
+
+        // Cancel video recording
+        document
+          .getElementById("cancel-video-recording")
+          .addEventListener("click", function () {
+            document.getElementById("video-recording-overlay").style.display =
+              "none";
+            console.log("Video recording stopped");
+          });
+
+        // Toggle sidebar for mobile
+        toggleSidebarBtn.addEventListener("click", function () {
+          document.body.classList.toggle("sidebar-open");
+        });
+
+        // Close sidebar when clicking on a channel (mobile)
+        document
+          .querySelector(".channels-scroll-area")
+          .addEventListener("click", function (e) {
+            if (e.target.closest(".channel") && window.innerWidth <= 768) {
+              document.body.classList.remove("sidebar-open");
+            }
+          });
+
+        // Helper function to add a channel
+        function addChannel(container, name, status, active = false) {
+          const channel = document.createElement("button");
+          channel.className = `channel ${active ? "active" : ""}`;
+          channel.innerHTML = `
+            <div class="avatar" style="background: #3498db; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+              ${name.charAt(0).toUpperCase()}
+            </div>
+            <div class="channel-info">
+              <div class="channel-name">${name}</div>
+              <div class="channel-status">${status}</div>
+            </div>
+          `;
+          container.appendChild(channel);
+        }
+
+        // Helper function to add message to UI
+        function addMessageToUI(sender, content, isOutgoing = false) {
+          const messagesContainer = document.getElementById("messages");
+          const messageDiv = document.createElement("div");
+          messageDiv.className = `message ${
+            isOutgoing ? "outgoing" : "incoming"
+          }`;
+
+          const timestamp = new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          messageDiv.innerHTML = `
+            ${!isOutgoing ? `<div class="username">${sender}</div>` : ""}
+            <div class="content">${content}</div>
+            <div class="timestamp">${timestamp}</div>
+          `;
+
+          // Remove system message if it's the first message
+          const systemMessage =
+            messagesContainer.querySelector(".system-message");
+          if (systemMessage && messagesContainer.children.length === 1) {
+            systemMessage.remove();
+          }
+
+          messagesContainer.appendChild(messageDiv);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+      });
+    </script>
+    <script type="module" src="./media-handlers.js"></script>
+    <script type="module" src="./ui-helpers.js"></script>
+    <script type="module" src="./client.js"></script>
+  </body>
+</html>

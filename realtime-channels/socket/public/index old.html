@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WKForce Realtime Chat Simulation</title>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <script>
+      window.SOCKET_URL = "http://localhost:4000";
+      window.DEBUG = true;
+    </script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #e5ddd5;
+        display: flex;
+        height: 100vh;
+        color: #333;
+        gap: 10px;
+      }
+      .sidebar {
+        width: 380px;
+        background: #2d3748;
+        display: flex;
+        flex-direction: column;
+        color: white;
+        padding: 20px;
+        height: 100vh;
+        overflow: hidden; /* prevent sidebar itself from scrolling */
+      }
+
+      .channels-scroll-area {
+        flex: 1;
+        overflow-y: auto; /* scroll only this part */
+        scrollbar-width: thin;
+        scrollbar-color: #4a5568 #2d3748;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .channels-scroll-area::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .channels-scroll-area::-webkit-scrollbar-thumb {
+        background: #4a5568;
+        border-radius: 3px;
+      }
+
+      .channels-scroll-area::-webkit-scrollbar-thumb:hover {
+        background: #5c2d91;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #4a5568;
+      }
+
+      header img {
+        width: 160px;
+        margin-bottom: 10px;
+      }
+
+      .connection-status {
+        background: #4a5568;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      #socketio-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 0.9em;
+      }
+      .status-dot {
+        height: 12px;
+        width: 12px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .status-dot.connected {
+        background: #48bb78;
+        box-shadow: 0 0 8px #48bb78;
+      }
+      .status-dot.disconnected {
+        background: #f56565;
+      }
+
+      .status-dot.connecting {
+        background: #ed8936;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .user-setup {
+        margin-bottom: 20px;
+      }
+
+      .user-setup input {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        background: #4a5568;
+        color: white;
+        font-size: 14px;
+      }
+
+      .user-setup button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        background: #5c2d91;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .user-setup button:hover {
+        background: #4a2475;
+      }
+
+      .channels-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .channels-section h3 {
+        margin-bottom: 15px;
+        color: #a0aec0;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: sticky;
+        top: 0;
+        background: #2d3748;
+        padding: 5px 0;
+        z-index: 1;
+      }
+
+      .channels {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .channels button {
+        padding: 10px 12px;
+        border: none;
+        border-radius: 8px;
+        background: #4a5568;
+        color: white;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+      }
+
+      .channels button:hover {
+        background: #5c2d91;
+      }
+
+      .channels button.active {
+        background: #5c2d91;
+        box-shadow: 0 2px 8px rgba(92, 45, 145, 0.4);
+      }
+
+      .avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #718096;
+        background: #fff; /* ensures visibility */
+        display: block;
+      }
+      .channel-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1;
+      }
+
+      .channel-name {
+        font-weight: 500;
+      }
+
+      .channel-status {
+        font-size: 0.75em;
+        color: #a0aec0;
+        margin-top: 2px;
+      }
+
+      .chat-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: white;
+      }
+
+      .chat-header {
+        padding: 20px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .chat-header h3 {
+        color: #2d3748;
+        font-size: 1.3em;
+      }
+
+      #connected-user {
+        font-size: 0.9em;
+        color: #718096;
+        font-weight: 500;
+      }
+
+      .messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #e5ddd5;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .message {
+        padding: 12px 16px;
+        border-radius: 12px;
+        max-width: 70%;
+        position: relative;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .message.incoming {
+        background: white;
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+      }
+
+      .message.outgoing {
+        background: #dcf8c6;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+      }
+
+      .message .username {
+        font-weight: 600;
+        font-size: 0.85em;
+        color: #5c2d91;
+        margin-bottom: 4px;
+      }
+
+      .message .content {
+        font-size: 0.95em;
+        line-height: 1.4;
+        margin-bottom: 4px;
+      }
+
+      .message .timestamp {
+        font-size: 0.75em;
+        color: #718096;
+        text-align: right;
+      }
+
+      .message .message-type {
+        position: absolute;
+        top: -8px;
+        right: 12px;
+        background: #5c2d91;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.6em;
+        font-weight: bold;
+      }
+
+      .system-message {
+        text-align: center;
+        color: #718096;
+        font-style: italic;
+        font-size: 0.85em;
+        margin: 8px 0;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 8px;
+        max-width: 80%;
+        align-self: center;
+      }
+
+      .typing-indicator {
+        font-style: italic;
+        font-size: 0.8em;
+        color: #718096;
+        margin: 5px 20px;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        align-self: flex-start;
+      }
+
+      /* WhatsApp-style Input Area */
+      .input-area {
+        border-top: 1px solid #e2e8f0;
+        padding: 10px 16px;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .input-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        background: white;
+        border-radius: 24px;
+        padding: 5px 5px 5px 15px;
+        position: relative;
+      }
+
+      .input-container input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 12px 8px;
+        font-size: 15px;
+        background: transparent;
+      }
+
+      .input-container input:disabled {
+        background: transparent;
+        color: #a0aec0;
+      }
+
+      .input-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .icon-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        color: #666;
+        transition: background 0.2s;
+      }
+
+      .icon-btn:hover:not(:disabled) {
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      .icon-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      #emoji-btn {
+        font-size: 20px;
+      }
+
+      #send-btn {
+        background: #5c2d91;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      #send-btn:hover:not(:disabled) {
+        background: #4a2475;
+      }
+
+      #send-btn:disabled {
+        background: #a0aec0;
+        cursor: not-allowed;
+      }
+
+      #send-btn .send-icon,
+      #send-btn .voice-icon {
+        font-size: 18px;
+      }
+
+      #send-btn .voice-icon {
+        display: none;
+      }
+
+      #send-btn.voice-mode .send-icon {
+        display: none;
+      }
+
+      #send-btn.voice-mode .voice-icon {
+        display: block;
+      }
+
+      /* Recording animation */
+      @keyframes recording-pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      #send-btn.recording {
+        animation: recording-pulse 1s infinite;
+        background: #f56565;
+      }
+
+      #emoji-picker {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        max-width: 240px;
+        position: absolute;
+        bottom: 70px;
+        right: 70px;
+        z-index: 100;
+      }
+
+      #emoji-picker span {
+        cursor: pointer;
+        font-size: 1.3em;
+      }
+
+      /* Media player styles */
+      .audio-player,
+      .video-player {
+        margin: 8px 0;
+        max-width: 100%;
+      }
+
+      .file-download {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #2d3748;
+        transition: background 0.2s;
+      }
+
+      .file-download:hover {
+        background: #e2e8f0;
+        text-decoration: none;
+      }
+
+      /* Scrollbar styling */
+      .messages::-webkit-scrollbar {
+        width: 10px;
+        height: 20px;
+      }
+
+      .messages::-webkit-scrollbar-track {
+        background: #2d3748;
+      }
+
+      .messages::-webkit-scrollbar-thumb {
+        background: #4a5568;
+        border-radius: 5px;
+      }
+
+      .messages::-webkit-scrollbar-thumb:hover {
+        background: #5c2d91;
+      }
+
+      .channels-section::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      /* Smooth scrolling for better UX */
+      .sidebar,
+      .channels-section,
+      .messages {
+        scroll-behavior: smooth;
+      }
+
+      .channels-section::-webkit-scrollbar-track {
+        background: #2d3748;
+      }
+
+      .channels-section::-webkit-scrollbar-thumb {
+        background: #4a5568;
+        border-radius: 3px;
+      }
+
+      .channels-section::-webkit-scrollbar-thumb:hover {
+        background: #5c2d91;
+      }
+
+      /* Direct Test Section */
+      .direct-test {
+        flex-shrink: 0;
+        background: #4a5568;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #718096;
+      }
+
+      .direct-test h4 {
+        color: #e2e8f0;
+        margin-bottom: 12px;
+        font-size: 0.9em;
+      }
+
+      .direct-test label {
+        display: block;
+        color: #a0aec0;
+        font-size: 0.8em;
+        margin-bottom: 4px;
+        margin-top: 8px;
+      }
+
+      .direct-test input {
+        width: 100%;
+        padding: 8px;
+        border: none;
+        border-radius: 4px;
+        background: #2d3748;
+        color: white;
+        font-size: 0.9em;
+      }
+
+      .direct-test button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #5c2d91;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 12px;
+        transition: background 0.2s;
+      }
+
+      .direct-test button:hover {
+        background: #4a2475;
+      }
+
+      /* Message status styles */
+      .message-status {
+        position: absolute;
+        bottom: 6px;
+        right: 12px;
+        font-size: 0.7em;
+        color: #4e4f50ff;
+      }
+
+      /* Mode indicators */
+      .mode-indicator {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7em;
+        font-weight: bold;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+
+      .mode-direct {
+        background: #5c2d91;
+        color: white;
+      }
+
+      .mode-group {
+        background: #2d3748;
+        color: white;
+      }
+
+      .recording-overlay {
+        position: fixed;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(45, 55, 72, 0.95);
+        color: white;
+        border-radius: 16px;
+        padding: 20px 30px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        z-index: 2000;
+      }
+
+      .recording-overlay.video {
+        flex-direction: column;
+        padding: 16px;
+        width: 260px;
+        background: rgba(20, 20, 20, 0.95);
+      }
+
+      .recording-overlay.video video {
+        width: 100%;
+        border-radius: 12px;
+        border: 2px solid #38b2ac;
+        margin-bottom: 10px;
+        background: black;
+      }
+
+      .recording-indicator {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #f56565;
+        box-shadow: 0 0 10px #f56565;
+        animation: recording-blink 1s infinite;
+      }
+
+      .chat-gif,
+      .chat-sticker {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 8px;
+        margin-top: 6px;
+        display: block;
+      }
+
+      @keyframes recording-blink {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(1.2);
+        }
+      }
+
+      #cancel-audio-recording,
+      #cancel-video-recording {
+        background: #e53e3e;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 0.8em;
+        transition: background 0.2s;
+      }
+
+      #cancel-audio-recording:hover,
+      #cancel-video-recording:hover {
+        background: #c53030;
+      }
+      /* Responsive design */
+      @media (max-width: 768px) {
+        body {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          height: auto;
+          max-height: 40vh;
+        }
+
+        .chat-area {
+          height: 60vh;
+        }
+
+        .message {
+          max-width: 85%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <button class="toggle-sidebar-btn" id="toggleSidebar">☰ Channels</button>
+    <div class="sidebar">
+      <header>
+        <img
+          src="/assets/wkforceLogo.png"
+          alt="WKForce Logo"
+          onerror="this.style.display='none'"
+        />
+        <h2>COMMS-CHANNELS</h2>
+      </header>
+
+      <div class="connection-status">
+        <div id="socketio-status">
+          <span class="status-dot disconnected"></span>
+          <span class="status-text">Disconnected</span>
+        </div>
+      </div>
+
+      <div class="channels-scroll-area">
+        <div class="direct-test">
+          <h4>🔹 Quick Connect</h4>
+          <p style="color: #a0aec0; font-size: 0.8em; margin-bottom: 12px">
+            Enter names to start chatting immediately
+          </p>
+
+          <label>Your Name:</label>
+          <input id="userName" placeholder="Alex" value="Alex" />
+
+          <label>Receiver Name (for direct chat):</label>
+          <input
+            id="receiverName"
+            placeholder="Light - leave empty for group mode"
+          />
+
+          <button id="connectBtn">Connect & Start Chat</button>
+
+          <div style="margin-top: 10px; font-size: 0.75em; color: #a0aec0">
+            <div>• <strong>Name only</strong> → Group chat mode</div>
+            <div>• <strong>Name + Receiver</strong> → Direct chat mode</div>
+          </div>
+        </div>
+
+        <div class="channels-section">
+          <h3>Direct Messages</h3>
+          <div class="channels" id="direct-channels">
+            <!-- All direct channels with avatars -->
+            <button
+              data-channel="87e2c874-9570-4042-a9f5-6dcccad8b53f"
+              data-type="direct"
+            >
+              <img
+                src="/assets/avatar1.png"
+                alt="Alex"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Alex</span>
+                <span class="channel-status">Online</span>
+              </div>
+            </button>
+
+            <button
+              data-channel="d9b2868b-638c-4f31-b103-4ac14b99009a"
+              data-type="direct"
+            >
+              <img
+                src="/assets/avatar2.png"
+                alt="Alice"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Alice</span>
+                <span class="channel-status">Online</span>
+              </div>
+            </button>
+
+            <button
+              data-channel="783f39e2-31a6-418a-a146-8082e7c924ce"
+              data-type="direct"
+            >
+              <img
+                src="/assets/avatar3.png"
+                alt="Bob"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Bob</span>
+                <span class="channel-status">Online</span>
+              </div>
+            </button>
+
+            <button
+              data-channel="a7bcacb2-68f6-4c78-a6e8-9514722b2322"
+              data-type="direct"
+            >
+              <img
+                src="/assets/avatar4.png"
+                alt="Hannah"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Hannah</span>
+                <span class="channel-status">Online</span>
+              </div>
+            </button>
+
+            <button
+              data-channel="0337eeab-b827-455e-81be-aa196bac0477"
+              data-type="direct"
+            >
+              <img
+                src="/assets/avatar5.png"
+                alt="Diana"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Diana</span>
+                <span class="channel-status">Online</span>
+              </div>
+            </button>
+
+            <button
+              data-channel="b860536c-ac4a-40d8-8381-384f67d2200e"
+              data-type="direct"
+            >
+              <img
+                src="/assets/avatar6.png"
+                alt="Light"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Light</span>
+                <span class="channel-status">You</span>
+              </div>
+            </button>
+
+            <button
+              data-channel="d47a1860-7d2d-4d7f-941f-a77a6c889620"
+              data-type="direct"
+            >
+              <img
+                src="/assets/avatar7.png"
+                alt="Ethan"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Ethan</span>
+                <span class="channel-status">Online</span>
+              </div>
+            </button>
+
+            <button
+              data-channel="3d20a7ff-9064-4981-8440-f999661d4609"
+              data-type="direct"
+            >
+              <img
+                src="/assets/avatar8.png"
+                alt="Charlie"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Charlie</span>
+                <span class="channel-status">Online</span>
+              </div>
+            </button>
+          </div>
+
+          <h3 style="margin-top: 20px">Group Channels</h3>
+          <div class="channels" id="group-channels">
+            <button
+              data-channel="0b158e7f-7547-4082-bc94-e0378f9ed5cd"
+              data-type="group"
+            >
+              <img
+                src="/assets/avatar9.png"
+                alt="Dev Team"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Dev Team</span>
+                <span class="channel-status">8 members</span>
+              </div>
+            </button>
+
+            <button
+              data-channel="ce8cf87d-1677-4a43-857b-5f128f95b6dc"
+              data-type="group"
+            >
+              <img
+                src="/assets/avatar10.png"
+                alt="Casual Chat"
+                class="avatar"
+                onerror="this.src='/assets/default-avatar.png'"
+              />
+              <div class="channel-info">
+                <span class="channel-name">Casual Chat</span>
+                <span class="channel-status">12 members</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-area">
+      <div class="chat-header" style="position: relative">
+        <h3 id="chat-title">Select a channel to start chatting</h3>
+        <p id="connected-user" style="margin-top: 10px; font-weight: bold"></p>
+
+        <div
+          id="unread-indicator"
+          style="
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            color: #c00;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+          "
+        ></div>
+      </div>
+
+      <div id="messages" class="messages">
+        <div class="system-message">
+          Welcome to COMMS-CHANNELS! Connect and select a channel to start
+          messaging.
+        </div>
+      </div>
+
+      <div id="typing-indicator" class="typing-indicator"></div>
+
+      <!-- WhatsApp-style Input Area -->
+      <div class="input-area">
+        <button class="icon-btn" id="emoji-btn" title="Emoji" disabled>
+          😊
+        </button>
+
+        <button class="icon-btn" id="attach-btn" title="Attach file" disabled>
+          📎
+        </button>
+
+        <div class="input-container">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Type a message... (Connect and select a channel first)"
+            maxlength="500"
+            disabled
+          />
+          <button class="icon-btn" id="video-btn" title="Send video" disabled>
+            🎥
+          </button>
+
+          <input
+            type="file"
+            id="video-file-input"
+            accept="video/*"
+            style="display: none"
+          />
+        </div>
+
+        <button id="send-btn" disabled>
+          <span class="send-icon">➤</span>
+          <span class="voice-icon">🎤</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- AUDIO Recording Overlay -->
+    <div
+      id="audio-recording-overlay"
+      class="recording-overlay"
+      style="display: none"
+    >
+      <div class="recording-box">
+        <div class="recording-indicator"></div>
+        <p id="audio-recording-text">Recording voice message...</p>
+        <button id="cancel-audio-recording">Stop</button>
+      </div>
+    </div>
+
+    <!-- VIDEO Recording Overlay -->
+    <div
+      id="video-recording-overlay"
+      class="recording-overlay video"
+      style="display: none"
+    >
+      <video id="recording-preview" autoplay muted></video>
+      <div class="recording-box">
+        <div class="recording-indicator"></div>
+        <p id="video-recording-text">Recording video message...</p>
+        <button id="cancel-video-recording">Stop</button>
+      </div>
+    </div>
+
+    <!-- Load the external client.js file - this handles ALL the logic -->
+    <script src="/public/client.js"></script>
+<script src="/public/media-handlers.js"></script>
+<script src="/public/socket-events.js"></script>
+<script src="/public/ui-helpers.js"></script>
+
+    <script>
+      const toggleSidebarBtn = document.getElementById("toggleSidebar");
+      const channelsDiv = document.querySelector(".channels");
+
+      if (toggleSidebarBtn && channelsDiv) {
+        toggleSidebarBtn.addEventListener("click", () => {
+          channelsDiv.classList.toggle("active");
+        });
+      }
+    </script>
+  </body>
+</html>
