@@ -3,7 +3,7 @@ const {
     getNotificationCount,
     markAsRead,
     markAllAsRead,
-    deleteNotification,
+    deleteNotification: deleteNotificationRepo,
     deleteAllRead,
 } = require("../repositories/notificationRepository");
 const logger = require("../utils/logger");
@@ -161,7 +161,7 @@ exports.deleteNotification = async (req, res) => {
         const { id } = req.params;
         const userId = req.user._id;
 
-        await deleteNotification(id, userId);
+        await deleteNotificationRepo(id, userId);
 
         res.status(200).json({
             STATUS_CODE: 200,
@@ -215,10 +215,10 @@ exports.deleteAllReadNotifications = async (req, res) => {
 };
 
 module.exports = {
-    getMyNotifications,
-    getUnreadCount,
-    markNotificationAsRead,
-    markAllNotificationsAsRead,
-    deleteNotification,
-    deleteAllReadNotifications,
+    getMyNotifications: exports.getMyNotifications,
+    getUnreadCount: exports.getUnreadCount,
+    markNotificationAsRead: exports.markNotificationAsRead,
+    markAllNotificationsAsRead: exports.markAllNotificationsAsRead,
+    deleteNotification: exports.deleteNotification,
+    deleteAllReadNotifications: exports.deleteAllReadNotifications,
 };

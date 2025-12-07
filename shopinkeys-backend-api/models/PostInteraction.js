@@ -55,5 +55,6 @@ postInteractionSchema.index({ postId: 1, type: 1 });
 postInteractionSchema.index({ postId: 1, userId: 1, type: 1 }); // To prevent duplicate likes/ratings
 postInteractionSchema.index({ userId: 1 });
 postInteractionSchema.index({ parentInteractionId: 1 }); // For fetching replies
+postInteractionSchema.index({ postId: 1, ipAddress: 1, createdAt: -1 }); // For view deduplication
 
 module.exports = mongoose.model("PostInteraction", postInteractionSchema);

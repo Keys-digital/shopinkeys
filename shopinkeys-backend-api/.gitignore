@@ -3,6 +3,8 @@ node_modules/
 
 # Environment variables
 .env
+.env.production
+.env.test
 
 # Ignore logs
 logs/
@@ -41,4 +43,9 @@ Thumbs.db
 
 # Ignore createAdmin script
 scripts/createAdmin.js
+
+# Ignore tests utils
+tests/utils/*
+
+node_modules
 

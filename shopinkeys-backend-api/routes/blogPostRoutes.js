@@ -90,10 +90,21 @@ router.put(
 );
 
 /**
+ * @route   GET /api/blog-posts/public
+ * @desc    Get all published blog posts
+ * @access  Public
+ */
+router.get(
+    "/public",
+    blogPostController.getAllPublicPosts
+);
+
+/**
  * @route   GET /api/blog-posts/public/:slug
  * @desc    Get public post by slug
  * @access  Public
  */
+
 router.get(
     "/public/:slug",
     blogPostController.getPostBySlug

@@ -14,7 +14,17 @@ const { createNotification } = require("../repositories/notificationRepository")
  */
 exports.submitRequest = async (req, res) => {
     try {
+        // Check if user is authenticated
+        if (!req.user) {
+            return res.status(401).json({
+                STATUS_CODE: 401,
+                STATUS: false,
+                MESSAGE: "You must be a registered user to apply",
+            });
+        }
+
         const userId = req.user._id;
+
 
         // Check if user already has a pending or approved request
         const existingRequest = await CollaboratorRequest.findOne({ userId });
