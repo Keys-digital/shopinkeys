@@ -12,7 +12,9 @@ describe("User Repository", () => {
   describe("findOne", () => {
     it("should find a user by filter", async () => {
       const mockUser = { _id: "123", email: "test@example.com" };
-      User.findOne.mockResolvedValue(mockUser);
+      User.findOne.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockUser),
+      });
 
       const result = await userRepository.findOne({
         email: "test@example.com",
@@ -23,7 +25,9 @@ describe("User Repository", () => {
     });
 
     it("should return null if an error occurs", async () => {
-      User.findOne.mockRejectedValue(new Error("Database error"));
+      User.findOne.mockReturnValue({
+        lean: jest.fn().mockRejectedValue(new Error("Database error")),
+      });
 
       await expect(userRepository.findOne({
         email: "fail@example.com",
@@ -39,7 +43,9 @@ describe("User Repository", () => {
         role: { name: "Admin" },
       };
       User.findOne.mockReturnValue({
-        populate: jest.fn().mockResolvedValue(mockUser),
+        populate: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue(mockUser)
+        }),
       });
 
       const result = await userRepository.findUserAndRole({
@@ -52,7 +58,9 @@ describe("User Repository", () => {
 
     it("should return null if an error occurs", async () => {
       User.findOne.mockReturnValue({
-        populate: jest.fn().mockRejectedValue(new Error("Database error")),
+        populate: jest.fn().mockReturnValue({
+          lean: jest.fn().mockRejectedValue(new Error("Database error"))
+        }),
       });
 
       await expect(userRepository.findUserAndRole({
@@ -100,7 +108,7 @@ describe("User Repository", () => {
       expect(User.findOneAndUpdate).toHaveBeenCalledWith(
         { email: "test@example.com" },
         { email: "updated@example.com" },
-        { new: true }
+        { new: true, lean: true }
       );
       expect(result).toEqual(mockUpdatedUser);
     });

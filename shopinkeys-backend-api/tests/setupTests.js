@@ -1,34 +1,23 @@
-const { MongoMemoryServer } = require("mongodb-memory-server");
 const mongoose = require("mongoose");
+const logger = require("../utils/logger");
 
-let mongoServer;
+// Mock Logger to prevent console noise during tests
+jest.mock("../utils/logger", () => ({
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    stream: { write: jest.fn() },
+}));
 
-// Increase Jest timeout for all tests
-jest.setTimeout(30000);
+// Global changes for Mongoose
+mongoose.set("strictQuery", true);
 
 beforeAll(async () => {
-    // Create in-memory MongoDB instance
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-
-    // Connect to the in-memory database
-    await mongoose.connect(mongoUri);
+    // Increase timeout for slow CI environments
+    jest.setTimeout(30000);
 });
 
 afterAll(async () => {
-    // Close database connection
-    await mongoose.disconnect();
-
-    // Stop MongoDB instance
-    if (mongoServer) {
-        await mongoServer.stop();
-    }
-});
-
-afterEach(async () => {
-    // Clean up database between tests (optional)
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-        await collections[key].deleteMany({});
-    }
+    // Clean up
 });

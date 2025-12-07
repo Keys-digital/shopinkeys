@@ -9,16 +9,21 @@ const combinedLogPath = path.join(__dirname, "../logs/combined.log");
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
-    winston.format.colorize(),
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `[${timestamp}] ${level}: ${message}`;
-    })
+    winston.format.errors({ stack: true }),
+    winston.format.json() // Structured JSON logging
   ),
   transports: [
-    new winston.transports.Console(), // Console Logging
-    new winston.transports.File({ filename: errorLogPath, level: "error" }), // Error Log File
-    new winston.transports.File({ filename: combinedLogPath }), // General Log File
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.printf(({ timestamp, level, message, stack }) => {
+          return `[${timestamp}] ${level}: ${message} ${stack ? "\n" + stack : ""}`;
+        })
+      ),
+    }),
+    new winston.transports.File({ filename: errorLogPath, level: "error" }),
+    new winston.transports.File({ filename: combinedLogPath }),
   ],
 });
 

@@ -1,7 +1,9 @@
 const express = require("express");
-const { authenticateUser } = require("../middlewares/authMiddleware");
+const { authenticateUser, optionalAuthenticateUser } = require("../middlewares/authMiddleware");
 const { roleMiddleware } = require("../middlewares/roleMiddleware");
 const blogPostController = require("../controllers/blogPost.controller");
+
+const { contentCreationLimiter } = require("../middlewares/rateLimiter");
 
 const router = express.Router();
 
@@ -9,11 +11,13 @@ const router = express.Router();
  * @route   POST /api/blog-posts
  * @desc    Create a new blog post
  * @access  Collaborator
+ * @rateLimit 10 submissions per hour per IP
  */
 router.post(
     "/",
     authenticateUser,
     roleMiddleware(["Collaborator"]),
+    contentCreationLimiter,
     blogPostController.createPost
 );
 
@@ -96,6 +100,7 @@ router.put(
  */
 router.get(
     "/public",
+    optionalAuthenticateUser,
     blogPostController.getAllPublicPosts
 );
 
@@ -107,6 +112,7 @@ router.get(
 
 router.get(
     "/public/:slug",
+    optionalAuthenticateUser,
     blogPostController.getPostBySlug
 );
 
@@ -161,6 +167,7 @@ router.post(
  */
 router.get(
     "/:id/related",
+    optionalAuthenticateUser,
     blogPostController.getRelatedPosts
 );
 

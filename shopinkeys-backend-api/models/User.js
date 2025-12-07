@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcryptjs = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const profileSchema = new mongoose.Schema({
   bio: {
@@ -124,6 +125,13 @@ userSchema.pre("findOneAndUpdate", function (next) {
 //  Compare password method
 userSchema.methods.comparePassword = function (candidatePassword) {
   return bcryptjs.compareSync(candidatePassword, this.password);
+};
+
+//  Generate JWT Token
+userSchema.methods.getSignedJwtToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || "30d",
+  });
 };
 
 module.exports = mongoose.model("User", userSchema);

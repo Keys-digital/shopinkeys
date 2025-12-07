@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { POST_STATUS } = require("../constants");
 
 const blogPostSchema = new mongoose.Schema(
     {
@@ -41,8 +42,8 @@ const blogPostSchema = new mongoose.Schema(
         }],
         status: {
             type: String,
-            enum: ["draft", "in_review", "approved", "rejected", "published"],
-            default: "draft",
+            enum: Object.values(POST_STATUS),
+            default: POST_STATUS.DRAFT,
         },
         reviewedBy: {
             type: mongoose.Schema.Types.ObjectId,
