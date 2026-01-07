@@ -4,5 +4,39 @@
     "forbidden": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen.",
     "not_found": "Die angeforderte Ressource wurde nicht gefunden.",
     "internal_server": "Ein unerwarteter Fehler ist aufgetreten."
+  },
+  "validation": {
+    "failed": "Validierung fehlgeschlagen",
+    "affiliate": {
+      "title_required": "Titel ist erforderlich",
+      "title_max": "Der Titel darf 200 Zeichen nicht überschreiten",
+      "image_url": "Das Bild muss eine gültige URL sein",
+      "url_required": "Affiliate-URL ist erforderlich",
+      "url_valid": "Die Affiliate-URL muss eine gültige URL sein",
+      "url_protocol": "Die Affiliate-URL muss mit http:// oder https:// beginnen",
+      "price_positive": "Der Preis muss eine positive Zahl sein"
+    },
+    "share": {
+      "post_id_required": "Beitrags-ID ist erforderlich",
+      "post_id_invalid": "Die Beitrags-ID muss eine gültige MongoDB-ObjectId sein",
+      "post_id_length": "Die Beitrags-ID muss 24 Zeichen lang sein",
+      "platforms_min": "Mindestens eine Plattform ist erforderlich",
+      "platforms_required": "Plattformen sind erforderlich"
+    },
+    "collaborator": {
+      "message_required": "Anfragenachricht ist erforderlich",
+      "message_min": "Die Anfragenachricht muss mindestens 50 Zeichen lang sein",
+      "message_max": "Die Anfragenachricht darf 1000 Zeichen nicht überschreiten",
+      "niche_required": "Nische ist erforderlich"
+    },
+    "blog": {
+      "title_required": "Titel ist erforderlich",
+      "title_min": "Der Titel muss mindestens 10 Zeichen lang sein",
+      "title_max": "Der Titel darf 200 Zeichen nicht überschreiten",
+      "content_required": "Inhalt ist erforderlich",
+      "content_min": "Der Inhalt muss mindestens 100 Zeichen lang sein",
+      "meta_title_max": "Der Meta-Titel darf für optimale SEO 60 Zeichen nicht überschreiten",
+      "meta_description_max": "Die Meta-Beschreibung darf für optimale SEO 155 Zeichen nicht überschreiten"
+    }
   }
 }

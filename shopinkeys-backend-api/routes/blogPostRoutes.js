@@ -4,7 +4,8 @@ const { roleMiddleware } = require("../middlewares/roleMiddleware");
 const blogPostController = require("../controllers/blogPost.controller");
 
 const { contentCreationLimiter } = require("../middlewares/rateLimiter");
-
+const { validate } = require("../middlewares/validation");
+const { updatePostSchema, createPostSchema } = require("../utils/validationSchemas");
 const router = express.Router();
 
 /**
@@ -16,8 +17,9 @@ const router = express.Router();
 router.post(
     "/",
     authenticateUser,
-    roleMiddleware(["Collaborator"]),
+    roleMiddleware(["Collaborator", "Editor", "Admin", "Super Admin"]),
     contentCreationLimiter,
+    validate(createPostSchema),
     blogPostController.createPost
 );
 
@@ -29,7 +31,7 @@ router.post(
 router.get(
     "/my-posts",
     authenticateUser,
-    roleMiddleware(["Collaborator"]),
+    roleMiddleware(["Collaborator", "Editor", "Admin", "Super Admin"]),
     blogPostController.getMyPosts
 );
 
@@ -53,7 +55,7 @@ router.get(
 router.post(
     "/upload",
     authenticateUser,
-    roleMiddleware(["Collaborator"]),
+    roleMiddleware(["Collaborator", "Editor", "Super Admin"]),
     blogPostController.uploadMedia
 );
 
@@ -65,7 +67,7 @@ router.post(
 router.put(
     "/:id/approve",
     authenticateUser,
-    roleMiddleware(["Editor", "Admin", "Super Admin"]),
+    roleMiddleware(["Editor", "Admin", "Super Admin"]),  // Admin does not review posts
     blogPostController.approvePost
 );
 
@@ -77,19 +79,21 @@ router.put(
 router.put(
     "/:id/reject",
     authenticateUser,
-    roleMiddleware(["Editor", "Admin", "Super Admin"]),
+    roleMiddleware(["Editor", "Super Admin"]),  // Admin does not review posts
     blogPostController.rejectPost
 );
 
 /**
  * @route   PUT /api/blog-posts/:id
- * @desc    Update a blog post
- * @access  Collaborator, Editor, Admin
+ * @desc    Update own blog post
+ * @access  Collaborator, Editor, Admin, Super Admin
  */
 router.put(
     "/:id",
     authenticateUser,
     roleMiddleware(["Collaborator", "Editor", "Admin", "Super Admin"]),
+    blogPostController.assertCanEditPost,
+    validate(updatePostSchema),
     blogPostController.updatePost
 );
 

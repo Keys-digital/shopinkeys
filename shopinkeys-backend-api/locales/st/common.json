@@ -1,0 +1,84 @@
+{
+    "errors": {
+        "unauthorized": "Phihlelelo e sa lumelloang.",
+        "forbidden": "Ha o na tumello ea ho fihlella mohloli ona.",
+        "not_found": "Mohloli o kōptjoang ha o fumanoe.",
+        "internal_server": "Phoso e sa lebelloang e etsahetse."
+    },
+    "validation": {
+        "failed": "Tlhahlobo e ile ea hloleha",
+        "affiliate": {
+            "title_required": "Sehlooho se hlokahala",
+            "title_max": "Sehlooho ha se lokela ho feta litlhaku tse 200",
+            "image_url": "Setšoantšo se lokela ho ba URL e nepahetseng",
+            "url_required": "URL ea motsoali e hlokahala",
+            "url_valid": "URL ea motsoali e lokela ho ba URL e nepahetseng",
+            "url_protocol": "URL ea motsoali e lokela ho qala ka http:// kapa https://",
+            "price_positive": "Theko e lokela ho ba nomoro e ntle"
+        },
+        "share": {
+            "post_id_required": "ID ea poso e hlokahala",
+            "post_id_invalid": "ID ea poso e tlameha ho ba MongoDB ObjectId e nepahetseng",
+            "post_id_length": "ID ea poso e tlameha ho ba le litlhaku tse 24",
+            "platforms_min": "Bonyane sethala se le seng se hlokahala",
+            "platforms_required": "Litsebeletso li hlokahala"
+        },
+        "collaborator": {
+            "message_required": "Molaetsa oa kopo o hlokahala",
+            "message_min": "Molaetsa oa kopo o tlameha ho ba le bonyane litlhaku tse 50",
+            "message_max": "Molaetsa oa kopo ha o lokela ho feta litlhaku tse 1000",
+            "niche_required": "Sebaka sa mosebetsi se hlokahala"
+        },
+        "blog": {
+            "title_required": "Sehlooho se hlokahala",
+            "title_min": "Sehlooho se tlameha ho ba le bonyane litlhaku tse 10",
+            "title_max": "Sehlooho ha se lokela ho feta litlhaku tse 200",
+            "content_required": "Tlhahisoleseding e hlokahala",
+            "content_min": "Tlhahisoleseding e tlameha ho ba le bonyane litlhaku tse 100",
+            "meta_title_max": "Sehlooho sa Meta ha se lokela ho feta litlhaku tse 60 bakeng sa SEO e ntle",
+            "meta_description_max": "Tlhaloso ea Meta ha e lokela ho feta litlhaku tse 155 bakeng sa SEO e ntle"
+        }
+    }
+}
+{
+    "errors": {
+        "unauthorized": "Phihlelelo e sa lumelloang.",
+        "forbidden": "Ha o na tumello ea ho fihlella mohloli ona.",
+        "not_found": "Mohloli o kōptjoang ha o fumanoe.",
+        "internal_server": "Phoso e sa lebelloang e etsahetse."
+    },
+    "validation": {
+        "failed": "Tlhahlobo e ile ea hloleha",
+        "affiliate": {
+            "title_required": "Sehlooho se hlokahala",
+            "title_max": "Sehlooho ha se lokela ho feta litlhaku tse 200",
+            "image_url": "Setšoantšo se lokela ho ba URL e nepahetseng",
+            "url_required": "URL ea motsoali e hlokahala",
+            "url_valid": "URL ea motsoali e lokela ho ba URL e nepahetseng",
+            "url_protocol": "URL ea motsoali e lokela ho qala ka http:// kapa https://",
+            "price_positive": "Theko e lokela ho ba nomoro e ntle"
+        },
+        "share": {
+            "post_id_required": "ID ea poso e hlokahala",
+            "post_id_invalid": "ID ea poso e tlameha ho ba MongoDB ObjectId e nepahetseng",
+            "post_id_length": "ID ea poso e tlameha ho ba le litlhaku tse 24",
+            "platforms_min": "Bonyane sethala se le seng se hlokahala",
+            "platforms_required": "Litsebeletso li hlokahala"
+        },
+        "collaborator": {
+            "message_required": "Molaetsa oa kopo o hlokahala",
+            "message_min": "Molaetsa oa kopo o tlameha ho ba le bonyane litlhaku tse 50",
+            "message_max": "Molaetsa oa kopo ha o lokela ho feta litlhaku tse 1000",
+            "niche_required": "Sebaka sa mosebetsi se hlokahala"
+        },
+        "blog": {
+            "title_required": "Sehlooho se hlokahala",
+            "title_min": "Sehlooho se tlameha ho ba le bonyane litlhaku tse 10",
+            "title_max": "Sehlooho ha se lokela ho feta litlhaku tse 200",
+            "content_required": "Tlhahisoleseding e hlokahala",
+            "content_min": "Tlhahisoleseding e tlameha ho ba le bonyane litlhaku tse 100",
+            "meta_title_max": "Sehlooho sa Meta ha se lokela ho feta litlhaku tse 60 bakeng sa SEO e ntle",
+            "meta_description_max": "Tlhaloso ea Meta ha e lokela ho feta litlhaku tse 155 bakeng sa SEO e ntle"
+        }
+    }
+}

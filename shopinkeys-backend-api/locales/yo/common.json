@@ -1,0 +1,42 @@
+{
+    "errors": {
+        "unauthorized": "Wíwọlé láì gba àṣẹ.",
+        "forbidden": "O kò ní àṣẹ láti wọlé sí orísun yìí.",
+        "not_found": "A kò rí orísun tí o béèrè.",
+        "internal_server": "Àṣìṣe àìrètí kan ṣẹlẹ̀."
+    },
+    "validation": {
+        "failed": "Ìmúdájú kò ṣàṣeyọrí",
+        "affiliate": {
+            "title_required": "Àkọlé jẹ́ dandan",
+            "title_max": "Àkọlé kò gbọ́dọ̀ ju àmi-ọrọ 200 lọ",
+            "image_url": "Àwòrán gbọ́dọ̀ jẹ́ URL tó péye",
+            "url_required": "URL alábàápín jẹ́ dandan",
+            "url_valid": "URL alábàápín gbọ́dọ̀ jẹ́ URL tó péye",
+            "url_protocol": "URL alábàápín gbọ́dọ̀ bẹ̀rẹ̀ pẹ̀lú http:// tàbí https://",
+            "price_positive": "Iye owó gbọ́dọ̀ jẹ́ nómba rere"
+        },
+        "share": {
+            "post_id_required": "ID ìfìwéránṣẹ́ jẹ́ dandan",
+            "post_id_invalid": "ID ìfìwéránṣẹ́ gbọ́dọ̀ jẹ́ MongoDB ObjectId tó péye",
+            "post_id_length": "ID ìfìwéránṣẹ́ gbọ́dọ̀ ní àmi-ọrọ 24",
+            "platforms_min": "Ó yẹ kí pẹpẹ kan wà ní kéré tán",
+            "platforms_required": "Àwọn pẹpẹ jẹ́ dandan"
+        },
+        "collaborator": {
+            "message_required": "Ifiranṣẹ́ ìbéèrè jẹ́ dandan",
+            "message_min": "Ifiranṣẹ́ ìbéèrè gbọ́dọ̀ ní àmi-ọrọ 50 ní kéré tán",
+            "message_max": "Ifiranṣẹ́ ìbéèrè kò gbọ́dọ̀ ju àmi-ọrọ 1000 lọ",
+            "niche_required": "Nísì jẹ́ dandan"
+        },
+        "blog": {
+            "title_required": "Àkọlé jẹ́ dandan",
+            "title_min": "Àkọlé gbọ́dọ̀ ní àmi-ọrọ 10 ní kéré tán",
+            "title_max": "Àkọlé kò gbọ́dọ̀ ju àmi-ọrọ 200 lọ",
+            "content_required": "Àkóónú jẹ́ dandan",
+            "content_min": "Àkóónú gbọ́dọ̀ ní àmi-ọrọ 100 ní kéré tán",
+            "meta_title_max": "Àkọlé meta kò gbọ́dọ̀ ju àmi-ọrọ 60 lọ fún SEO tó dára",
+            "meta_description_max": "Àpejuwe meta kò gbọ́dọ̀ ju àmi-ọrọ 155 lọ fún SEO tó dára"
+        }
+    }
+}

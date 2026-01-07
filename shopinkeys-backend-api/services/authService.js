@@ -24,11 +24,11 @@ const registerUser = async ({ name, username, email, password }) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     if (await User.findOne({ email: normalizedEmail })) {
-      return { STATUS_CODE: 409, STATUS: false, message: "auth.email_in_use" };
+      return { STATUS_CODE: 409, STATUS: false, message: "auth:email_in_use" };
     }
 
     if (await User.findOne({ username: normalizedUsername })) {
-      return { status: false, message: "auth.username_taken" };
+      return { status: false, message: "auth:username_taken" };
     }
 
     // Create user (password hashed by pre-save hook)
@@ -60,12 +60,12 @@ const registerUser = async ({ name, username, email, password }) => {
     return {
       STATUS_CODE: 201,
       status: true,
-      message: "auth.registration_success",
+      message: "auth:registration_success",
     };
 
   } catch (error) {
     console.error("Register User Error:", error);
-    return { status: false, message: "An internal server error occurred." };
+    return { status: false, message: "errors:internal_server" };
   }
 };
 
@@ -77,15 +77,15 @@ const registerUser = async ({ name, username, email, password }) => {
 const login = async (email, password) => {
   try {
     const user = await User.findOne({ email }).select("+password");
-    if (!user) return { STATUS_CODE: 400, STATUS: false, MESSAGE: "auth.invalid_credentials" };
+    if (!user) return { STATUS_CODE: 400, STATUS: false, MESSAGE: "auth:invalid_credentials" };
 
-    if (!password) return { STATUS_CODE: 400, STATUS: false, MESSAGE: "auth.password_required" };
+    if (!password) return { STATUS_CODE: 400, STATUS: false, MESSAGE: "auth:password_required" };
 
     const isMatch = user.comparePassword(password);
-    if (!isMatch) return { STATUS_CODE: 400, STATUS: false, MESSAGE: "auth.invalid_credentials" };
+    if (!isMatch) return { STATUS_CODE: 400, STATUS: false, MESSAGE: "auth:invalid_credentials" };
 
     if (!user.isEmailVerified) {
-      return { STATUS_CODE: 403, STATUS: false, MESSAGE: "auth.verify_email" };
+      return { STATUS_CODE: 403, STATUS: false, MESSAGE: "auth:verify_email" };
     }
 
     const token = generateToken({ id: user._id, role: user.role });
@@ -102,10 +102,10 @@ const login = async (email, password) => {
     user.lastLoginAt = new Date();
     await user.save();
 
-    return { STATUS_CODE: 200, STATUS: true, MESSAGE: "auth.login_success", DATA: { token, user } };
+    return { STATUS_CODE: 200, STATUS: true, MESSAGE: "auth:login_success", DATA: { token, user } };
   } catch (error) {
     console.error("Login User Error:", error);
-    return { STATUS_CODE: 500, STATUS: false, MESSAGE: "errors.internal_server" };
+    return { STATUS_CODE: 500, STATUS: false, MESSAGE: "errors:internal_server" };
   }
 };
 
@@ -117,16 +117,16 @@ const verifyEmail = async (token) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(decoded.id);
 
-    if (!user) return { success: false, message: "auth.invalid_or_expired_token" };
-    if (user.isEmailVerified) return { success: false, message: "auth.email_already_verified" };
+    if (!user) return { success: false, message: "auth:invalid_or_expired_token" };
+    if (user.isEmailVerified) return { success: false, message: "auth:email_already_verified" };
 
     user.isEmailVerified = true;
     await user.save();
 
-    return { success: true, message: "auth.email_verified_success" };
+    return { success: true, message: "auth:email_verified_success" };
   } catch (error) {
     console.error("Verify Email Error:", error);
-    return { success: false, message: "auth.invalid_or_expired_token" };
+    return { success: false, message: "auth:invalid_or_expired_token" };
   }
 };
 
@@ -136,7 +136,7 @@ const verifyEmail = async (token) => {
 const generatePasswordResetToken = async (email) => {
   try {
     const user = await User.findOne({ email });
-    if (!user) return { success: false, statusCode: 404, message: "auth.user_not_found" };
+    if (!user) return { success: false, statusCode: 404, message: "auth:user_not_found" };
 
     const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -156,10 +156,10 @@ const generatePasswordResetToken = async (email) => {
       html: forgotPasswordEmailTemplate(user.name, resetUrl),
     });
 
-    return { success: true, message: "auth.password_reset_sent" };
+    return { success: true, message: "auth:password_reset_sent" };
   } catch (error) {
     console.error("Forgot Password Error:", error);
-    return { success: false, message: "errors.internal_server" };
+    return { success: false, message: "errors:internal_server" };
   }
 };
 
@@ -172,7 +172,7 @@ const resetPassword = async (token, newPassword) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(decoded.id);
 
-    if (!user) return { success: false, message: "auth.invalid_token" };
+    if (!user) return { success: false, message: "auth:invalid_token" };
 
     user.password = newPassword; // hashed automatically by schema
     user.passwordResetToken = undefined;
@@ -186,10 +186,10 @@ const resetPassword = async (token, newPassword) => {
       html: passwordResetConfirmationTemplate(user.name),
     });
 
-    return { success: true, message: "auth.password_reset_success" };
+    return { success: true, message: "auth:password_reset_success" };
   } catch (error) {
     console.error("Reset Password Error:", error);
-    return { success: false, message: "auth.invalid_token" };
+    return { success: false, message: "auth:invalid_token" };
   }
 };
 
@@ -199,8 +199,8 @@ const resetPassword = async (token, newPassword) => {
 const resendVerificationEmail = async (email) => {
   try {
     const user = await User.findOne({ email });
-    if (!user) return { success: false, message: "auth.user_not_found" };
-    if (user.isEmailVerified) return { success: false, message: "auth.email_already_verified" };
+    if (!user) return { success: false, message: "auth:user_not_found" };
+    if (user.isEmailVerified) return { success: false, message: "auth:email_already_verified" };
 
     const verificationToken = generateToken({ id: user._id }, "24h");
     const verificationUrl = `https://yourdomain.com/verify-email/${verificationToken}`;
@@ -211,10 +211,10 @@ const resendVerificationEmail = async (email) => {
       html: verificationEmailTemplate(user.name, verificationUrl),
     });
 
-    return { success: true, message: "auth.verification_email_sent" };
+    return { success: true, message: "auth:verification_email_sent" };
   } catch (error) {
     console.error("Resend Verification Error:", error);
-    return { success: false, message: "errors.internal_server" };
+    return { success: false, message: "errors:internal_server" };
   }
 };
 
@@ -263,7 +263,7 @@ const loginWithOAuth = async (profile) => {
     return { STATUS: true, DATA: { token, user } };
   } catch (error) {
     console.error("OAuth Login Error:", error);
-    return { STATUS: false, MESSAGE: "errors.internal_server" };
+    return { STATUS: false, MESSAGE: "errors:internal_server" };
   }
 };
 
@@ -278,7 +278,7 @@ const getUserById = async (userId) => {
       return {
         STATUS_CODE: 404,
         STATUS: false,
-        MESSAGE: "auth.user_not_found",
+        MESSAGE: "auth:user_not_found",
         DATA: null,
       };
     }
@@ -286,7 +286,7 @@ const getUserById = async (userId) => {
     return {
       STATUS_CODE: 200,
       STATUS: true,
-      MESSAGE: "auth.access_granted",
+      MESSAGE: "auth:access_granted",
       DATA: user,
     };
   } catch (error) {
@@ -294,7 +294,7 @@ const getUserById = async (userId) => {
     return {
       STATUS_CODE: 500,
       STATUS: false,
-      MESSAGE: "errors.internal_server",
+      MESSAGE: "errors:internal_server",
       DATA: null,
     };
   }

@@ -4,6 +4,7 @@ const logger = require("../utils/logger");
 const { logAudit } = require("../repositories/auditLogRepository");
 const { postProcessingQueue } = require("../services/postProcessingQueue");
 const { createPostSchema, updatePostSchema } = require("../utils/validationSchemas");
+const i18n = require("../config/i18nConfig");
 const { POST_STATUS, AUDIT_ACTIONS, INTERACTION_TYPES, ROLES } = require("../constants");
 
 /**
@@ -64,16 +65,7 @@ const checkAutoApprove = async (content, featuredImage, type = "seo", keyword = 
  */
 exports.createPost = async (req, res) => {
     try {
-        const { error, value } = createPostSchema.validate(req.body);
-        if (error) {
-            return res.status(400).json({
-                STATUS_CODE: 400,
-                STATUS: false,
-                MESSAGE: error.details[0].message,
-            });
-        }
-
-        const { title, content, excerpt, featuredImage, media, tags, category, status, keywords, canonicalUrl, metaDescription, type, mainKeyword } = value;
+        const { title, metaTitle, content, excerpt, featuredImage, media, tags, category, status, keywords, canonicalUrl, metaDescription, type, mainKeyword } = req.body;
 
         // Generate slug from title
         const slug = title
@@ -94,6 +86,7 @@ exports.createPost = async (req, res) => {
         const newPost = await blogPostRepository.createPost({
             authorId: req.user._id,
             title,
+            metaTitle,
             slug,
             content,
             excerpt,
@@ -130,7 +123,10 @@ exports.createPost = async (req, res) => {
             STATUS_CODE: 201,
             STATUS: true,
             MESSAGE: newPost.status === POST_STATUS.APPROVED ? "Blog post created and auto-approved!" : "Blog post created successfully.",
-            DATA: newPost,
+            DATA: {
+                ...newPost.toObject(),
+                metaDescriptionLength: newPost.metaDescription?.length || 0,
+            },
         });
     } catch (error) {
         logger.error(`Error creating blog post: ${error.message}`);
@@ -142,25 +138,10 @@ exports.createPost = async (req, res) => {
     }
 };
 
-/**
- * Update a blog post
- * PUT /api/blog-posts/:id
- * Access: Collaborator (own posts), Editor, Admin
- */
-exports.updatePost = async (req, res) => {
+// Role Authorization for blog post
+exports.assertCanEditPost = async (req, res, next) => {
     try {
-        const { id } = req.params;
-
-        const { error, value } = updatePostSchema.validate(req.body);
-        if (error) {
-            return res.status(400).json({
-                STATUS_CODE: 400,
-                STATUS: false,
-                MESSAGE: error.details[0].message,
-            });
-        }
-
-        const post = await blogPostRepository.findPostById(id);
+        const post = await blogPostRepository.findPostById(req.params.id);
         if (!post) {
             return res.status(404).json({
                 STATUS_CODE: 404,
@@ -169,29 +150,53 @@ exports.updatePost = async (req, res) => {
             });
         }
 
-        // Check ownership & Authorization
-        const isAuthor = post.authorId.toString() === req.user._id.toString();
-        const isCollaborator = req.user.role === ROLES.COLLABORATOR;
-        const isEditorOrAdmin = [ROLES.EDITOR, ROLES.ADMIN, ROLES.SUPER_ADMIN].includes(req.user.role);
+        const user = req.user;
 
-        if (isCollaborator && !isAuthor) {
-            return res.status(403).json({
-                STATUS_CODE: 403,
-                STATUS: false,
-                MESSAGE: "You can only update your own posts.",
-            });
+        // Admins and Super Admins can edit any post
+        if ([ROLES.SUPER_ADMIN].includes(user.role)) {
+            req.post = post;
+            return next();
         }
 
-        if (isEditorOrAdmin && !isAuthor) {
-            return res.status(403).json({
-                STATUS_CODE: 403,
-                STATUS: false,
-                MESSAGE: "Editors and Admins cannot directly edit posts. Use the approve/reject workflow instead.",
-            });
+        // Editors can edit their own posts if allowed
+        if (user.role === ROLES.EDITOR && post.authorId.toString() === user._id.toString()) {
+            req.post = post;
+            return next();
         }
+
+        // Collaborators can only edit their own posts
+        if (user.role === ROLES.COLLABORATOR && post.authorId.toString() === user._id.toString()) {
+            req.post = post;
+            return next();
+        }
+
+        return res.status(403).json({
+            STATUS_CODE: 403,
+            STATUS: false,
+            MESSAGE: "You are not authorized to edit this post.",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            STATUS_CODE: 500,
+            STATUS: false,
+            MESSAGE: "Internal server error.",
+        });
+    }
+};
+
+
+/**
+ * Update a blog post
+ * PUT /api/blog-posts/:id
+ * Access: Collaborator (own posts), Editor, Admin
+ */
+exports.updatePost = async (req, res) => {
+    try {
+        const post = req.post
+        const value = req.body;
 
         // Collaborator updating a published post
-        if (isCollaborator && value.status === POST_STATUS.PUBLISHED) {
+        if (req.user.role === ROLES.COLLABORATOR && value.status === POST_STATUS.PUBLISHED) {
             if (post.status === POST_STATUS.PUBLISHED) {
                 // No change needed
             } else if (post.status !== POST_STATUS.APPROVED) {
@@ -211,7 +216,7 @@ exports.updatePost = async (req, res) => {
         });
 
         // If collaborator updates a rejected post, move back to draft or in_review based on input, or default to draft
-        if (isCollaborator && post.status === POST_STATUS.REJECTED) {
+        if (req.user.role === ROLES.COLLABORATOR && value.status === POST_STATUS.REJECTED) {
             post.status = value.status || POST_STATUS.DRAFT;
         }
 
@@ -244,7 +249,10 @@ exports.updatePost = async (req, res) => {
             STATUS_CODE: 200,
             STATUS: true,
             MESSAGE: post.status === POST_STATUS.APPROVED ? "Blog post updated and auto-approved!" : "Blog post updated successfully.",
-            DATA: post,
+            DATA: {
+                ...post.toObject(),
+                metaDescriptionLength: post.metaDescription?.length || 0,
+            },
         });
     } catch (error) {
         logger.error(`Error updating blog post: ${error.message}`);
@@ -536,7 +544,10 @@ exports.getPostBySlug = async (req, res) => {
             STATUS_CODE: 200,
             STATUS: true,
             MESSAGE: "Post retrieved successfully.",
-            DATA: post,
+            DATA: {
+                ...post.toObject(),
+                metaDescriptionLength: post.metaDescription?.length || 0,
+            },
         });
     } catch (error) {
         logger.error(`Error fetching public post: ${error.message}`);

@@ -47,5 +47,21 @@ scripts/createAdmin.js
 # Ignore tests utils
 tests/utils/*
 
+ Mongo / test binaries
+.mongodb-binaries/
+
+# Test output artifacts
+test-dedup-fail.txt
+test-output-queue.txt
+test_failure.txt
+
+# Local debug / investigation files
+debug-post.js
+debug-redis-conn.js
+debug-test.js
+detailed_test_output.txt
+test-output.txt
+verify-i18n-script.js
+
 node_modules
 

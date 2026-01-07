@@ -1,7 +1,7 @@
 const AffiliateProduct = require("../models/AffiliateProduct");
 
 exports.findProductById = async (id) => {
-    return AffiliateProduct.findById(id).populate("addedBy", "name email name username");
+    return AffiliateProduct.findById(id).populate("addedBy", "name email username");
 };
 
 exports.findProductByIdWithDetails = async (id) => {

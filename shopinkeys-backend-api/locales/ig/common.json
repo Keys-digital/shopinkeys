@@ -1,0 +1,42 @@
+{
+  "errors": {
+    "unauthorized": "Enweghị ikike ịnweta.",
+    "forbidden": "Ị nweghị ikike ịnweta akụ a.",
+    "not_found": "Enweghị akụ a achọrọ.",
+    "internal_server": "Njehie a na-atụghị anya ya mere."
+  },
+  "validation": {
+    "failed": "Nlele agaghị arụ ọrụ",
+    "affiliate": {
+      "title_required": "A choro aha isiokwu",
+      "title_max": "Aha isiokwu agaghị gafere mkpụrụedemede 200",
+      "image_url": "Ihe oyiyi ga-abụ URL ziri ezi",
+      "url_required": "A choro URL njikọ",
+      "url_valid": "URL njikọ ga-abụ URL ziri ezi",
+      "url_protocol": "URL njikọ ga-amalite na http:// ma ọ bụ https://",
+      "price_positive": "Ahịa ga-abụ nọmba dị mma"
+    },
+    "share": {
+      "post_id_required": "A choro ID post",
+      "post_id_invalid": "ID post ga-abụ MongoDB ObjectId ziri ezi",
+      "post_id_length": "ID post ga-enwe mkpụrụedemede 24",
+      "platforms_min": "Ọ dịkarịa ala otu ikpo okwu dị mkpa",
+      "platforms_required": "Ikpo okwu dị mkpa"
+    },
+    "collaborator": {
+      "message_required": "A choro ozi arịrịọ",
+      "message_min": "Ozi arịrịọ ga-enwe mkpụrụedemede 50 ma ọ dịkarịa ala",
+      "message_max": "Ozi arịrịọ agaghị gafere mkpụrụedemede 1000",
+      "niche_required": "A choro niche"
+    },
+    "blog": {
+      "title_required": "A choro aha isiokwu",
+      "title_min": "Aha isiokwu ga-adịkarịa ala mkpụrụedemede 10",
+      "title_max": "Aha isiokwu agaghị gafere mkpụrụedemede 200",
+      "content_required": "A choro ọdịnaya",
+      "content_min": "Odinnaya ga-adịkarịa ala mkpụrụedemede 100",
+      "meta_title_max": "Meta aha isiokwu agaghị gafere mkpụrụedemede 60 maka SEO kacha mma",
+      "meta_description_max": "Meta nkọwa agaghị gafere mkpụrụedemede 155 maka SEO kacha mma"
+    }
+  }
+}

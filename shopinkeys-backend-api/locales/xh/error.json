@@ -1,0 +1,7 @@
+{
+    "unauthorized": "Akukho mvume yokungena.",
+    "forbidden": "Awunalo ilungelo lokufikelela kule resourse.",
+    "not_found": "Iresourse eceliweyo ayifumanekanga.",
+    "internal_server": "Iphutha elingalindelekanga livela kwiserver.",
+    "bad_request": "Isicelo asilunganga."
+}

@@ -1,0 +1,7 @@
+{
+    "unauthorized": "Ukungena okungagunyaziwe.",
+    "forbidden": "Awunalo ilungelo lokufinyelela kulo mthombo.",
+    "not_found": "Umthombo ocelelekile awutholakali.",
+    "internal_server": "Kwenzeke iphutha elingalindelekile.",
+    "bad_request": "Isicelo esingalungile."
+}

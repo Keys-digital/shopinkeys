@@ -1,0 +1,42 @@
+{
+    "errors": {
+        "unauthorized": "Ukungena okungagunyaziswanga.",
+        "forbidden": "Awunamvume yokufikelela kulo mthombo.",
+        "not_found": "Umthombo oceliweyo awufumanekanga.",
+        "internal_server": "Kwenzeke impazamo engalindelekanga."
+    },
+    "validation": {
+        "failed": "Ukuqinisekisa akuphumelelanga",
+        "affiliate": {
+            "title_required": "Isihloko siyafuneka",
+            "title_max": "Isihloko akufuneki sidlule kwiimpawu ezingama-200",
+            "image_url": "Umfanekiso kufuneka ube yi-URL esebenzayo",
+            "url_required": "I-URL ye-Affiliate iyafuneka",
+            "url_valid": "I-URL ye-Affiliate kufuneka ibe yi-URL esebenzayo",
+            "url_protocol": "I-URL ye-Affiliate kufuneka iqale ngo-http:// okanye https://",
+            "price_positive": "Ixabiso kufuneka libe linani elingaphezulu kuka-zero"
+        },
+        "share": {
+            "post_id_required": "I-ID yeposti iyafuneka",
+            "post_id_invalid": "I-ID yeposti kufuneka ibe yi-MongoDB ObjectId esebenzayo",
+            "post_id_length": "I-ID yeposti kufuneka ibe neempawu ezingama-24",
+            "platforms_min": "Kufuneka kukhethwe ubuncinane iqonga elinye",
+            "platforms_required": "Amaqonga ayafuneka"
+        },
+        "collaborator": {
+            "message_required": "Umyalezo wesicelo uyafuneka",
+            "message_min": "Umyalezo wesicelo kufuneka ube neempawu ezingama-50 ubuncinane",
+            "message_max": "Umyalezo wesicelo akufuneki udlule kwiimpawu eziyi-1000",
+            "niche_required": "I-niche iyafuneka"
+        },
+        "blog": {
+            "title_required": "Isihloko siyafuneka",
+            "title_min": "Isihloko kufuneka sibe neempawu ezili-10 ubuncinane",
+            "title_max": "Isihloko akufuneki sidlule kwiimpawu ezingama-200",
+            "content_required": "Umxholo uyafuneka",
+            "content_min": "Umxholo kufuneka ube neempawu ezili-100 ubuncinane",
+            "meta_title_max": "Isihloko se-meta akufuneki sidlule kwiimpawu ezingama-60 ukuze i-SEO ibe ngcono",
+            "meta_description_max": "Inkcazo ye-meta akufuneki idlule kwiimpawu ezingama-155 ukuze i-SEO ibe ngcono"
+        }
+    }
+}

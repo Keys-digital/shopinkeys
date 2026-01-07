@@ -36,7 +36,7 @@ exports.register = async (req, res) => {
     logger.error(`Error during registration: ${error.message}`);
     return res.status(500).json({
       status: false,
-      message: i18next.t("errors.internal_server", { lng: lang }),
+      message: i18next.t("errors:internal_server", { lng: lang }),
     });
   }
 };
@@ -55,7 +55,7 @@ exports.verifyEmail = async (req, res) => {
       logger.warn("Email verification failed: Missing token");
       return res.status(400).json({
         success: false,
-        message: i18next.t("auth.missing_verification_token", { lng: lang }),
+        message: i18next.t("auth:missing_verification_token", { lng: lang }),
       });
     }
 
@@ -78,7 +78,7 @@ exports.verifyEmail = async (req, res) => {
     logger.error(`Email verification error: ${error.message}`);
     return res.status(500).json({
       success: false,
-      message: i18next.t("errors.internal_server", { lng: lang }),
+      message: i18next.t("errors:internal_server", { lng: lang }),
     });
   }
 };
@@ -103,7 +103,7 @@ exports.login = async (req, res) => {
     logger.info(`User logged in successfully: ${email}`);
     return res.status(200).json({
       status: true,
-      message: i18next.t("auth.login_success", { lng: lang }),
+      message: i18next.t("auth:login_success", { lng: lang }),
       token: data.DATA.token,
       user: data.DATA.user,
     });
@@ -111,7 +111,7 @@ exports.login = async (req, res) => {
     logger.error(`Error during login: ${error.message}`);
     return res.status(500).json({
       status: false,
-      message: i18next.t("errors.internal_server", { lng: lang }),
+      message: i18next.t("errors:internal_server", { lng: lang }),
     });
   }
 };
@@ -125,7 +125,7 @@ exports.forgotPassword = async (req, res) => {
       logger.warn("Forgot password request failed: Missing email.");
       return res.status(400).json({
         status: false,
-        message: i18next.t("errors.bad_request", { lng: lang }),
+        message: i18next.t("errors:bad_request", { lng: lang }),
       });
     }
 
@@ -142,13 +142,13 @@ exports.forgotPassword = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: i18next.t("auth.password_reset_sent", { lng: lang }),
+      message: i18next.t("auth:password_reset_sent", { lng: lang }),
     });
   } catch (error) {
     logger.error(`Error in forgot password process: ${error.message}`);
     return res.status(500).json({
       status: false,
-      message: i18next.t("errors.internal_server", { lng: lang }),
+      message: i18next.t("errors:internal_server", { lng: lang }),
     });
   }
 };
@@ -164,7 +164,7 @@ exports.resetPassword = async (req, res) => {
       logger.warn("Reset password failed: Missing token or newPassword.");
       return res.status(400).json({
         status: false,
-        message: i18next.t("errors.bad_request", { lng: lang }),
+        message: i18next.t("errors:bad_request", { lng: lang }),
       });
     }
 
@@ -180,13 +180,13 @@ exports.resetPassword = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: i18next.t("auth.password_reset_success", { lng: lang }),
+      message: i18next.t("auth:password_reset_success", { lng: lang }),
     });
   } catch (error) {
     logger.error(`Error resetting password: ${error.message}`);
     return res.status(500).json({
       status: false,
-      message: i18next.t("errors.internal_server", { lng: lang }),
+      message: i18next.t("errors:internal_server", { lng: lang }),
     });
   }
 };
@@ -209,13 +209,13 @@ exports.logout = async (req, res) => {
     logger.info(`User logged out: ${req.user?.id}`);
     return res.status(200).json({
       status: true,
-      message: i18next.t("auth.logout_success", { lng: lang }),
+      message: i18next.t("auth:logout_success", { lng: lang }),
     });
   } catch (error) {
     logger.error(`Error during logout: ${error.message}`);
     return res.status(500).json({
       status: false,
-      message: i18next.t("errors.internal_server", { lng: lang }),
+      message: i18next.t("errors:internal_server", { lng: lang }),
     });
   }
 };
@@ -237,7 +237,7 @@ exports.getCurrentUser = async (req, res) => {
     logger.error(`Error fetching user info for user ID: ${req.user?.id}: ${error.message}`);
     return res.status(500).json({
       status: false,
-      message: i18next.t("errors.internal_server", { lng: lang }),
+      message: i18next.t("errors:internal_server", { lng: lang }),
     });
   }
 };
@@ -250,7 +250,7 @@ exports.resendVerification = async (req, res) => {
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: i18next.t("errors.bad_request", { lng: lang }),
+        message: i18next.t("errors:bad_request", { lng: lang }),
       });
     }
 
@@ -271,7 +271,7 @@ exports.resendVerification = async (req, res) => {
     logger.error(`Error resending verification email: ${error.message}`);
     return res.status(500).json({
       success: false,
-      message: i18next.t("errors.internal_server", { lng: lang }),
+      message: i18next.t("errors:internal_server", { lng: lang }),
     });
   }
 };

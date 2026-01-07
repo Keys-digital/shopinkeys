@@ -3,6 +3,7 @@ const { authenticateUser, optionalAuthenticateUser } = require("../middlewares/a
 const { roleMiddleware } = require("../middlewares/roleMiddleware");
 const affiliateProductController = require("../controllers/affiliateProduct.controller");
 const { clickTrackingLimiter, contentCreationLimiter } = require("../middlewares/rateLimiter");
+const { validate, affiliateProductSchema } = require("../middlewares/validation");
 
 const router = express.Router();
 
@@ -62,6 +63,7 @@ router.post(
     authenticateUser,
     roleMiddleware(["Collaborator"]),
     contentCreationLimiter,
+    validate(affiliateProductSchema),
     affiliateProductController.submitProduct
 );
 

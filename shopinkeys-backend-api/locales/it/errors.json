@@ -2,5 +2,6 @@
   "unauthorized": "Accesso non autorizzato.",
   "forbidden": "Non hai il permesso di accedere a questa risorsa.",
   "not_found": "Risorsa richiesta non trovata.",
-  "internal_server": "Si è verificato un errore imprevisto."
+  "internal_server": "Si è verificato un errore imprevisto.",
+  "bad_request": "Richiesta non valida."
 }

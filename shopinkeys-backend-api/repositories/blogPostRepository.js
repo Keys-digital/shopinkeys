@@ -38,7 +38,7 @@ exports.createPost = async (postData) => {
  */
 exports.findPosts = async (filter, skip, limit) => {
     return BlogPost.find(filter)
-        .select("title slug excerpt featuredImage publishedAt category tags status")
+        .select("title metaTitle slug excerpt featuredImage publishedAt category tags status readingTime")
         .populate("authorId", "name username")
         .sort({ publishedAt: -1, createdAt: -1 })
         .skip(skip)
