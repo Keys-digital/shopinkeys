@@ -1,0 +1,42 @@
+{
+    "errors": {
+        "unauthorized": "Ongemagtigde toegang.",
+        "forbidden": "Jy het nie toestemming om toegang tot hierdie hulpbron te kry nie.",
+        "not_found": "Die versoekte hulpbron is nie gevind nie.",
+        "internal_server": "’n Onverwagte fout het voorgekom."
+    },
+    "validation": {
+        "failed": "Validering het misluk",
+        "affiliate": {
+            "title_required": "Titel is vereis",
+            "title_max": "Titel mag nie 200 karakters oorskry nie",
+            "image_url": "Beeld moet ’n geldige URL wees",
+            "url_required": "Geaffilieerde URL is vereis",
+            "url_valid": "Geaffilieerde URL moet ’n geldige URL wees",
+            "url_protocol": "Geaffilieerde URL moet met http:// of https:// begin",
+            "price_positive": "Prys moet ’n positiewe getal wees"
+        },
+        "share": {
+            "post_id_required": "Plasing-ID is vereis",
+            "post_id_invalid": "Plasing-ID moet ’n geldige MongoDB ObjectId wees",
+            "post_id_length": "Plasing-ID moet 24 karakters lank wees",
+            "platforms_min": "Ten minste een platform is vereis",
+            "platforms_required": "Platforms is vereis"
+        },
+        "collaborator": {
+            "message_required": "Versoekboodskap is vereis",
+            "message_min": "Versoekboodskap moet minstens 50 karakters wees",
+            "message_max": "Versoekboodskap mag nie 1000 karakters oorskry nie",
+            "niche_required": "Nis is vereis"
+        },
+        "blog": {
+            "title_required": "Titel is vereis",
+            "title_min": "Titel moet minstens 10 karakters wees",
+            "title_max": "Titel mag nie 200 karakters oorskry nie",
+            "content_required": "Inhoud is vereis",
+            "content_min": "Inhoud moet minstens 100 karakters wees",
+            "meta_title_max": "Meta-titel mag nie 60 karakters oorskry vir optimale SEO nie",
+            "meta_description_max": "Meta-beskrywing mag nie 155 karakters oorskry vir optimale SEO nie"
+        }
+    }
+}

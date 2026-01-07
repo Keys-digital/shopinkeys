@@ -1,0 +1,42 @@
+{
+    "errors": {
+        "unauthorized": "Ur tessineḍ ara ad tefsed.",
+        "forbidden": "Ur k-id yella akken ad t-ssawal di wussan-a.",
+        "not_found": "Ussan n wussan ur yettwafaq ara.",
+        "internal_server": "Taqsist ur yettwafaq ara deg wussan."
+    },
+    "validation": {
+        "failed": "Tazwara n wussan ur yettwafaq ara",
+        "affiliate": {
+            "title_required": "Asmekti n wussan yella d-ḥeṛṛ",
+            "title_max": "Asmekti n wussan ur yelli ara 200 imaqaren",
+            "image_url": "Imejji yella d-URL s wawal",
+            "url_required": "URL n Affiliate yella d-ḥeṛṛ",
+            "url_valid": "URL n Affiliate yella d-URL s wawal",
+            "url_protocol": "URL n Affiliate yella d-tɣiwant http:// neɣ https://",
+            "price_positive": "Aḥeṛṛ n useqdec yella d-amenzuɣ"
+        },
+        "share": {
+            "post_id_required": "ID n Tazwara yella d-ḥeṛṛ",
+            "post_id_invalid": "ID n Tazwara yella d-ID valid MongoDB",
+            "post_id_length": "ID n Tazwara yella d-24 imaqaren",
+            "platforms_min": "Asefruɣ n usefruɣen d-yiwen",
+            "platforms_required": "Usefruɣen yella d-ḥeṛṛ"
+        },
+        "collaborator": {
+            "message_required": "Aṣa n tazwara yella d-ḥeṛṛ",
+            "message_min": "Aṣa n tazwara yella d-50 imaqaren s wadig",
+            "message_max": "Aṣa n tazwara ur yelli ara 1000 imaqaren",
+            "niche_required": "Niche yella d-ḥeṛṛ"
+        },
+        "blog": {
+            "title_required": "Asmekti n wussan yella d-ḥeṛṛ",
+            "title_min": "Asmekti n wussan yella d-10 imaqaren s wadig",
+            "title_max": "Asmekti n wussan ur yelli ara 200 imaqaren",
+            "content_required": "Aẓul yella d-ḥeṛṛ",
+            "content_min": "Aẓul yella d-100 imaqaren s wadig",
+            "meta_title_max": "Meta title ur yelli ara 60 imaqaren (SEO)",
+            "meta_description_max": "Meta description ur yelli ara 155 imaqaren (SEO)"
+        }
+    }
+}

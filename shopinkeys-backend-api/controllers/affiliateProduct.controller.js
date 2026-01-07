@@ -1,6 +1,8 @@
-const AffiliateProduct = require("../models/AffiliateProduct");
+const affiliateProductRepository = require("../repositories/affiliateProductRepository");
 const logger = require("../utils/logger");
 const { logAudit } = require("../repositories/auditLogRepository");
+const { submitProductSchema, updateProductSchema } = require("../utils/validationSchemas");
+const { AUDIT_ACTIONS, AFFILIATE_PARTNERS } = require("../constants");
 
 /**
  * Get all approved affiliate products (Public)
@@ -18,13 +20,8 @@ exports.getAllProducts = async (req, res) => {
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        const products = await AffiliateProduct.find(filter)
-            .select("title description image affiliateUrl price niche partner clicks createdAt")
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
-
-        const total = await AffiliateProduct.countDocuments(filter);
+        const products = await affiliateProductRepository.findProductsByFilter(filter, skip, parseInt(limit));
+        const total = await affiliateProductRepository.countProductsByFilter(filter);
 
         res.status(200).json({
             STATUS_CODE: 200,
@@ -59,9 +56,7 @@ exports.getProductById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const product = await AffiliateProduct.findOne({ _id: id, approved: true, deleted: false })
-            .populate("addedBy", "name username")
-            .select("-reviewNotes -reviewedBy");
+        const product = await affiliateProductRepository.findProductByIdWithDetails(id);
 
         if (!product) {
             return res.status(404).json({
@@ -101,7 +96,7 @@ exports.trackClick = async (req, res) => {
 
         // Check for duplicate clicks within 1 hour
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-        const product = await AffiliateProduct.findById(id);
+        const product = await affiliateProductRepository.findProductById(id);
 
         if (!product || product.deleted) {
             return res.status(404).json({
@@ -136,7 +131,7 @@ exports.trackClick = async (req, res) => {
             timestamp: new Date(),
         });
 
-        await product.save();
+        await affiliateProductRepository.saveProduct(product);
 
         logger.info(`Affiliate click tracked for product: ${id}`);
 
@@ -166,30 +161,29 @@ exports.trackClick = async (req, res) => {
  */
 exports.submitProduct = async (req, res) => {
     try {
-        const { title, description, image, affiliateUrl, price, niche, partner } = req.body;
-
-        // Validate required fields
-        if (!title || !affiliateUrl) {
+        // Validation using Joi
+        const { error, value } = submitProductSchema.validate(req.body);
+        if (error) {
             return res.status(400).json({
                 STATUS_CODE: 400,
                 STATUS: false,
-                MESSAGE: "Title and affiliate URL are required.",
+                MESSAGE: error.details[0].message,
             });
         }
 
-        const newProduct = new AffiliateProduct({
+        const { title, description, image, affiliateUrl, price, niche, partner } = value;
+
+        const newProduct = await affiliateProductRepository.createProduct({
             title,
             description,
             image,
             affiliateUrl,
             price,
             niche,
-            partner: partner || "Other",
+            partner: partner || AFFILIATE_PARTNERS.OTHER,
             addedBy: req.user._id,
             approved: false, // Pending approval
         });
-
-        await newProduct.save();
 
         logger.info(`Affiliate product submitted by user: ${req.user.email}`);
 
@@ -216,8 +210,7 @@ exports.submitProduct = async (req, res) => {
  */
 exports.getMyProducts = async (req, res) => {
     try {
-        const products = await AffiliateProduct.find({ addedBy: req.user._id })
-            .sort({ createdAt: -1 });
+        const products = await affiliateProductRepository.findMyProducts(req.user._id);
 
         res.status(200).json({
             STATUS_CODE: 200,
@@ -245,7 +238,7 @@ exports.approveProduct = async (req, res) => {
         const { id } = req.params;
         const { reviewNotes } = req.body;
 
-        const product = await AffiliateProduct.findById(id).populate("addedBy", "name email");
+        const product = await affiliateProductRepository.findProductById(id);
         if (!product) {
             return res.status(404).json({
                 STATUS_CODE: 404,
@@ -266,11 +259,11 @@ exports.approveProduct = async (req, res) => {
         product.reviewedBy = req.user._id;
         if (reviewNotes) product.reviewNotes = reviewNotes;
 
-        await product.save();
+        await affiliateProductRepository.saveProduct(product);
 
         await logAudit({
             userId: req.user._id,
-            action: "APPROVE_AFFILIATE_PRODUCT",
+            action: AUDIT_ACTIONS.APPROVE_AFFILIATE_PRODUCT,
             targetUserId: product.addedBy._id,
             details: `Approved affiliate product: ${product.title}`,
             ipAddress: req.ip,
@@ -305,7 +298,7 @@ exports.rejectProduct = async (req, res) => {
         const { id } = req.params;
         const { reviewNotes } = req.body;
 
-        const product = await AffiliateProduct.findById(id).populate("addedBy", "name email");
+        const product = await affiliateProductRepository.findProductById(id);
         if (!product) {
             return res.status(404).json({
                 STATUS_CODE: 404,
@@ -328,11 +321,11 @@ exports.rejectProduct = async (req, res) => {
         product.rejectedAt = new Date();
         product.reviewedBy = req.user._id;
         product.reviewNotes = reviewNotes || "No reason provided";
-        await product.save();
+        await affiliateProductRepository.saveProduct(product);
 
         await logAudit({
             userId: req.user._id,
-            action: "REJECT_AFFILIATE_PRODUCT",
+            action: AUDIT_ACTIONS.REJECT_AFFILIATE_PRODUCT,
             targetUserId: product.addedBy._id,
             details: `Rejected affiliate product: ${product.title}. Reason: ${reviewNotes || "No reason provided"}`,
             ipAddress: req.ip,
@@ -369,9 +362,18 @@ exports.rejectProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const updates = req.body;
 
-        const product = await AffiliateProduct.findById(id);
+        // Joi validation for updates
+        const { error, value } = updateProductSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                STATUS_CODE: 400,
+                STATUS: false,
+                MESSAGE: error.details[0].message,
+            });
+        }
+
+        const product = await affiliateProductRepository.findProductById(id);
         if (!product) {
             return res.status(404).json({
                 STATUS_CODE: 404,
@@ -380,15 +382,12 @@ exports.updateProduct = async (req, res) => {
             });
         }
 
-        // Update allowed fields
-        const allowedFields = ["title", "description", "image", "affiliateUrl", "price", "niche", "partner"];
-        allowedFields.forEach((field) => {
-            if (updates[field] !== undefined) {
-                product[field] = updates[field];
-            }
+        // Allow updates to Joi filtered fields
+        Object.keys(value).forEach((key) => {
+            product[key] = value[key];
         });
 
-        await product.save();
+        await affiliateProductRepository.saveProduct(product);
 
         logger.info(`Affiliate product updated: ${product.title}`);
 
@@ -417,7 +416,7 @@ exports.deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const product = await AffiliateProduct.findById(id);
+        const product = await affiliateProductRepository.findProductById(id);
         if (!product) {
             return res.status(404).json({
                 STATUS_CODE: 404,
@@ -437,11 +436,11 @@ exports.deleteProduct = async (req, res) => {
         // Soft delete: Mark as deleted instead of removing
         product.deleted = true;
         product.deletedAt = new Date();
-        await product.save();
+        await affiliateProductRepository.saveProduct(product);
 
         await logAudit({
             userId: req.user._id,
-            action: "DELETE_AFFILIATE_PRODUCT",
+            action: AUDIT_ACTIONS.DELETE_AFFILIATE_PRODUCT,
             details: `Deleted affiliate product: ${product.title}`,
             ipAddress: req.ip,
             userAgent: req.get("User-Agent"),

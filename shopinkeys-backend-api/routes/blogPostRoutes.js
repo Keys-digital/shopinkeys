@@ -1,19 +1,25 @@
 const express = require("express");
-const { authenticateUser } = require("../middlewares/authMiddleware");
+const { authenticateUser, optionalAuthenticateUser } = require("../middlewares/authMiddleware");
 const { roleMiddleware } = require("../middlewares/roleMiddleware");
 const blogPostController = require("../controllers/blogPost.controller");
 
+const { contentCreationLimiter } = require("../middlewares/rateLimiter");
+const { validate } = require("../middlewares/validation");
+const { updatePostSchema, createPostSchema } = require("../utils/validationSchemas");
 const router = express.Router();
 
 /**
  * @route   POST /api/blog-posts
  * @desc    Create a new blog post
  * @access  Collaborator
+ * @rateLimit 10 submissions per hour per IP
  */
 router.post(
     "/",
     authenticateUser,
-    roleMiddleware(["Collaborator"]),
+    roleMiddleware(["Collaborator", "Editor", "Admin", "Super Admin"]),
+    contentCreationLimiter,
+    validate(createPostSchema),
     blogPostController.createPost
 );
 
@@ -25,7 +31,7 @@ router.post(
 router.get(
     "/my-posts",
     authenticateUser,
-    roleMiddleware(["Collaborator"]),
+    roleMiddleware(["Collaborator", "Editor", "Admin", "Super Admin"]),
     blogPostController.getMyPosts
 );
 
@@ -49,7 +55,7 @@ router.get(
 router.post(
     "/upload",
     authenticateUser,
-    roleMiddleware(["Collaborator"]),
+    roleMiddleware(["Collaborator", "Editor", "Super Admin"]),
     blogPostController.uploadMedia
 );
 
@@ -61,7 +67,7 @@ router.post(
 router.put(
     "/:id/approve",
     authenticateUser,
-    roleMiddleware(["Editor", "Admin", "Super Admin"]),
+    roleMiddleware(["Editor", "Admin", "Super Admin"]),  // Admin does not review posts
     blogPostController.approvePost
 );
 
@@ -73,19 +79,21 @@ router.put(
 router.put(
     "/:id/reject",
     authenticateUser,
-    roleMiddleware(["Editor", "Admin", "Super Admin"]),
+    roleMiddleware(["Editor", "Super Admin"]),  // Admin does not review posts
     blogPostController.rejectPost
 );
 
 /**
  * @route   PUT /api/blog-posts/:id
- * @desc    Update a blog post
- * @access  Collaborator, Editor, Admin
+ * @desc    Update own blog post
+ * @access  Collaborator, Editor, Admin, Super Admin
  */
 router.put(
     "/:id",
     authenticateUser,
     roleMiddleware(["Collaborator", "Editor", "Admin", "Super Admin"]),
+    blogPostController.assertCanEditPost,
+    validate(updatePostSchema),
     blogPostController.updatePost
 );
 
@@ -96,6 +104,7 @@ router.put(
  */
 router.get(
     "/public",
+    optionalAuthenticateUser,
     blogPostController.getAllPublicPosts
 );
 
@@ -107,6 +116,7 @@ router.get(
 
 router.get(
     "/public/:slug",
+    optionalAuthenticateUser,
     blogPostController.getPostBySlug
 );
 
@@ -161,6 +171,7 @@ router.post(
  */
 router.get(
     "/:id/related",
+    optionalAuthenticateUser,
     blogPostController.getRelatedPosts
 );
 

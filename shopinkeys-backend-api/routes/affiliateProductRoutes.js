@@ -1,9 +1,9 @@
 const express = require("express");
-const { authenticateUser } = require("../middlewares/authMiddleware");
+const { authenticateUser, optionalAuthenticateUser } = require("../middlewares/authMiddleware");
 const { roleMiddleware } = require("../middlewares/roleMiddleware");
 const affiliateProductController = require("../controllers/affiliateProduct.controller");
-const { validate, affiliateProductSchema } = require("../middlewares/validation");
 const { clickTrackingLimiter, contentCreationLimiter } = require("../middlewares/rateLimiter");
+const { validate, affiliateProductSchema } = require("../middlewares/validation");
 
 const router = express.Router();
 
@@ -47,6 +47,7 @@ router.get(
  */
 router.post(
     "/:id/click",
+    optionalAuthenticateUser,
     clickTrackingLimiter,
     affiliateProductController.trackClick
 );

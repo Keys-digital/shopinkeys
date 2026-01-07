@@ -8,7 +8,7 @@ const envConfig = require("../../config/envConfig");
 
 describe("View Deduplication Tests", () => {
     let testUser;
-    let testPost;
+    let testPost; 
     let userToken;
 
     beforeEach(async () => {

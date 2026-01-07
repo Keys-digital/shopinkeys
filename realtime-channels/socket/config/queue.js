@@ -1,41 +1,53 @@
 // config/queue.js
 require("dotenv").config();
-const { Pool } = require("pg");
+const mongoose = require("mongoose");
 const EventEmitter = require("events");
 
 const usingRedis =
   process.env.USE_REDIS === "true" || process.env.NODE_ENV === "production";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: usingRedis ? { rejectUnauthorized: false } : false,
+// --- MongoDB Connection ---
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error("❌ MONGODB_URI is missing in environment variables");
+  process.exit(1);
+}
+
+mongoose
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("[DB] Connected to MongoDB"))
+  .catch((err) => {
+    console.error("[DB] MongoDB connection error:", err.message);
+    process.exit(1);
+  });
+
+mongoose.connection.on("error", (err) => {
+  console.error("[DB] Unexpected MongoDB error:", err.message);
 });
 
-pool.on("connect", () => {
-  console.log("[DB] Connected to PostgreSQL");
-});
-
-pool.on("error", (err) => {
-  console.error("[DB] Unexpected error:", err.message);
-});
-
+// Graceful shutdown
 process.on("SIGINT", async () => {
-  await pool.end();
-  console.log("[DB] Pool closed");
+  await mongoose.connection.close();
+  console.log("[DB] MongoDB connection closed");
   process.exit(0);
 });
 
+// --- Queue Logic (Redis or In-Memory Fallback) ---
 let messageQueue;
 
-// Fallback logic
 if (usingRedis) {
   console.log("[Queue] Redis mode enabled");
-  messageQueue = null; // Worker will handle Redis connection
+  messageQueue = null; // Redis worker handles queue externally
 } else {
   console.log("[Queue] Using in-memory message queue");
+
   const emitter = new EventEmitter();
 
-  // Minimal API for compatibility
+  // Simple API for job processing
   messageQueue = {
     process: (handler) => {
       emitter.on("enqueue", (job) => handler(job));
@@ -49,4 +61,4 @@ if (usingRedis) {
   };
 }
 
-module.exports = { pool, messageQueue, usingRedis };
+module.exports = { mongoose, messageQueue, usingRedis };

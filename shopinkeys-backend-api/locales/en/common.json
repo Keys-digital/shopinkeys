@@ -4,5 +4,39 @@
     "forbidden": "You do not have permission to access this resource.",
     "not_found": "The requested resource was not found.",
     "internal_server": "An unexpected error occurred."
+  },
+  "validation": {
+    "failed": "Validation failed",
+    "affiliate": {
+      "title_required": "Title is required",
+      "title_max": "Title must not exceed 200 characters",
+      "image_url": "Image must be a valid URL",
+      "url_required": "Affiliate URL is required",
+      "url_valid": "Affiliate URL must be a valid URL",
+      "url_protocol": "Affiliate URL must start with http:// or https://",
+      "price_positive": "Price must be a positive number"
+    },
+    "share": {
+      "post_id_required": "Post ID is required",
+      "post_id_invalid": "Post ID must be a valid MongoDB ObjectId",
+      "post_id_length": "Post ID must be 24 characters",
+      "platforms_min": "At least one platform is required",
+      "platforms_required": "Platforms are required"
+    },
+    "collaborator": {
+      "message_required": "Request message is required",
+      "message_min": "Request message must be at least 50 characters",
+      "message_max": "Request message must not exceed 1000 characters",
+      "niche_required": "Niche is required"
+    },
+    "blog": {
+      "title_required": "Title is required",
+      "title_min": "Title must be at least 10 characters",
+      "title_max": "Title must not exceed 200 characters",
+      "content_required": "Content is required",
+      "content_min": "Content must be at least 100 characters",
+      "meta_title_max": "Meta title must not exceed 60 characters for optimal SEO",
+      "meta_description_max": "Meta description must not exceed 155 characters for optimal SEO"
+    }
   }
 }

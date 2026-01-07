@@ -1,0 +1,42 @@
+{
+    "errors": {
+        "unauthorized": "Nyɛ yitsoɔ yɛ gbo.",
+        "forbidden": "Wo nɛ shi yɛ mɔ ni wɔ lɛ hewalɔ lɛ.",
+        "not_found": "Hewalɔ lɛ ni wɔ yɔ ni tsɔɔ ni shishi.",
+        "internal_server": "Gbɔmɔ ni yɛ nɔ lɛ."
+    },
+    "validation": {
+        "failed": "Gbɔmɔ ni yɛ yɛmɔ lɛ",
+        "affiliate": {
+            "title_required": "Tiitle ni hiɛ",
+            "title_max": "Tiitle ni yɛ lɛ mli lɛ he 200 characters",
+            "image_url": "Imiji ni yɛ URL lɛ mli",
+            "url_required": "Affiliate URL ni hiɛ",
+            "url_valid": "Affiliate URL ni yɛ URL lɛ mli",
+            "url_protocol": "Affiliate URL ni yɛ shishi lɛ ni tsɔ http:// alo https://",
+            "price_positive": "Price ni hiɛ be yɛ positive number"
+        },
+        "share": {
+            "post_id_required": "Post ID ni hiɛ",
+            "post_id_invalid": "Post ID ni hiɛ be yɛ MongoDB ObjectId lɛ mli",
+            "post_id_length": "Post ID ni yɛ lɛ mli lɛ 24 characters",
+            "platforms_min": "Platform kɛkɛ lɛ hiɛ",
+            "platforms_required": "Platforms ni hiɛ"
+        },
+        "collaborator": {
+            "message_required": "Request message ni hiɛ",
+            "message_min": "Request message ni yɛ lɛ mli lɛ 50 characters",
+            "message_max": "Request message ni yɛ lɛ shishi lɛ he 1000 characters",
+            "niche_required": "Niche ni hiɛ"
+        },
+        "blog": {
+            "title_required": "Tiitle ni hiɛ",
+            "title_min": "Tiitle ni yɛ lɛ mli lɛ 10 characters",
+            "title_max": "Tiitle ni yɛ lɛ shishi lɛ he 200 characters",
+            "content_required": "Content ni hiɛ",
+            "content_min": "Content ni yɛ lɛ mli lɛ 100 characters",
+            "meta_title_max": "Meta title ni yɛ lɛ shishi lɛ he 60 characters kɛ SEO ni tsɔ niŋ",
+            "meta_description_max": "Meta description ni yɛ lɛ shishi lɛ he 155 characters kɛ SEO ni tsɔ niŋ"
+        }
+    }
+}

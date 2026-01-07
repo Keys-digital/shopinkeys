@@ -120,3 +120,39 @@ exports.validateRefreshToken = async (req, res, next) => {
     });
   }
 };
+
+// Optional authentication middleware - populates req.user if valid token exists, otherwise proceeds as guest
+exports.optionalAuthenticateUser = async (req, res, next) => {
+  let token = req.header("Authorization");
+
+  if (!token || !token.startsWith("Bearer ")) {
+    // No token, proceed as guest
+    return next();
+  }
+
+  try {
+    token = token.split(" ")[1].trim();
+    const decoded = jwt.verify(token, envConfig.JWT_SECRET);
+
+    // Check if token is blacklisted (logged out)
+    const isBlacklisted = await isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      // Token revoked - treat as guest
+      return next();
+    }
+
+    const start = Date.now();
+    const user = await User.findById(decoded.id).select("+role");
+
+    if (user && user.isEmailVerified) {
+      req.user = user;
+      req.token = token;
+      req.authenticatedUserId = user._id; // Fallback helper
+    }
+
+    next();
+  } catch (error) {
+    // Token validaton failed - proceed as guest
+    next();
+  }
+};

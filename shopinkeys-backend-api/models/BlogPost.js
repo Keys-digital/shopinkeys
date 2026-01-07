@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { POST_STATUS } = require("../constants");
 
 const blogPostSchema = new mongoose.Schema(
     {
@@ -41,8 +42,8 @@ const blogPostSchema = new mongoose.Schema(
         }],
         status: {
             type: String,
-            enum: ["draft", "in_review", "approved", "rejected", "published"],
-            default: "draft",
+            enum: Object.values(POST_STATUS),
+            default: POST_STATUS.DRAFT,
         },
         reviewedBy: {
             type: mongoose.Schema.Types.ObjectId,
@@ -61,8 +62,15 @@ const blogPostSchema = new mongoose.Schema(
         category: {
             type: String,
         },
+        metaTitle: {
+            type: String,
+            maxlength: 60,
+            trim: true,
+        },
         metaDescription: {
             type: String,
+            maxlength: 155,
+            trim: true,
         },
         keywords: [{
             type: String,
@@ -71,6 +79,11 @@ const blogPostSchema = new mongoose.Schema(
         canonicalUrl: {
             type: String,
             trim: true,
+        },
+        readingTime: {
+            type: Number,  // in minutes
+            min: 1,
+            default: 1,
         },
         isCommentsEnabled: {
             type: Boolean,
@@ -84,4 +97,19 @@ const blogPostSchema = new mongoose.Schema(
 blogPostSchema.index({ status: 1, publishedAt: -1 });
 blogPostSchema.index({ authorId: 1 });
 
+// Pre-save hook: Auto-calculate reading time
+blogPostSchema.pre('save', function (next) {
+    if (this.isModified('content')) {
+        const text = this.content || "";
+        const words = text.trim()
+            ? text.trim().split(/\s+/).length
+            : 0;
+
+        // Calculate reading time (200 words per minute), minimum 1 minute
+        this.readingTime = Math.max(1, Math.ceil(words / 200));
+    }
+    next();
+});
+
 module.exports = mongoose.model("BlogPost", blogPostSchema);
+

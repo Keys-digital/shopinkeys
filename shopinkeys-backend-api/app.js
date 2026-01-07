@@ -33,13 +33,13 @@ app.use(morgan("combined", { stream: winston.stream }));
 // Routes with rate limiting
 app.use("/api/auth", authApiLimiter, authRoutes);
 app.use("/api/auth", authApiLimiter, oauthRoutes);
-app.use("/api/roles", roleRoutes);
-app.use("/api/profile", profileRoutes);
-app.use("/api/collaborator", require("./routes/collaboratorRoutes"));
-app.use("/api/blog-posts", require("./routes/blogPostRoutes"));
-app.use("/api/share-requests", require("./routes/shareRequestRoutes"));
-app.use("/api/notifications", require("./routes/notificationRoutes"));
-app.use("/api/affiliate-products", require("./routes/affiliateProductRoutes"));
+app.use("/api/roles", authApiLimiter, roleRoutes);
+app.use("/api/profile", authApiLimiter, profileRoutes);
+app.use("/api/collaborator", authApiLimiter, require("./routes/collaboratorRoutes"));
+app.use("/api/blog-posts", publicApiLimiter, require("./routes/blogPostRoutes"));
+app.use("/api/share-requests", authApiLimiter, require("./routes/shareRequestRoutes"));
+app.use("/api/notifications", authApiLimiter, require("./routes/notificationRoutes"));
+app.use("/api/affiliate-products", publicApiLimiter, require("./routes/affiliateProductRoutes"));
 
 
 app.get("/", (req, res) => {

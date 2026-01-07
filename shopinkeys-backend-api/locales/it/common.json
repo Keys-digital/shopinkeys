@@ -4,5 +4,39 @@
     "forbidden": "Non hai il permesso di accedere a questa risorsa.",
     "not_found": "La risorsa richiesta non è stata trovata.",
     "internal_server": "Si è verificato un errore imprevisto."
+  },
+  "validation": {
+    "failed": "Validazione fallita",
+    "affiliate": {
+      "title_required": "Il titolo è obbligatorio",
+      "title_max": "Il titolo non può superare i 200 caratteri",
+      "image_url": "L'immagine deve essere un URL valido",
+      "url_required": "L'URL affiliato è obbligatorio",
+      "url_valid": "L'URL affiliato deve essere un URL valido",
+      "url_protocol": "L'URL affiliato deve iniziare con http:// o https://",
+      "price_positive": "Il prezzo deve essere un numero positivo"
+    },
+    "share": {
+      "post_id_required": "L'ID del post è obbligatorio",
+      "post_id_invalid": "L'ID del post deve essere un MongoDB ObjectId valido",
+      "post_id_length": "L'ID del post deve contenere 24 caratteri",
+      "platforms_min": "È richiesta almeno una piattaforma",
+      "platforms_required": "Le piattaforme sono obbligatorie"
+    },
+    "collaborator": {
+      "message_required": "Il messaggio della richiesta è obbligatorio",
+      "message_min": "Il messaggio della richiesta deve contenere almeno 50 caratteri",
+      "message_max": "Il messaggio della richiesta non può superare i 1000 caratteri",
+      "niche_required": "Il settore è obbligatorio"
+    },
+    "blog": {
+      "title_required": "Il titolo è obbligatorio",
+      "title_min": "Il titolo deve contenere almeno 10 caratteri",
+      "title_max": "Il titolo non può superare i 200 caratteri",
+      "content_required": "Il contenuto è obbligatorio",
+      "content_min": "Il contenuto deve contenere almeno 100 caratteri",
+      "meta_title_max": "Il meta titolo non può superare i 60 caratteri per una SEO ottimale",
+      "meta_description_max": "La meta descrizione non può superare i 155 caratteri per una SEO ottimale"
+    }
   }
 }

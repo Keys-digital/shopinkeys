@@ -16,11 +16,23 @@ const affiliateProductSchema = new mongoose.Schema(
         image: {
             type: String, // Product image URL
             trim: true,
+            validate: {
+                validator: function (v) {
+                    return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(v);
+                },
+                message: props => `${props.value} is not a valid URL!`
+            }
         },
         affiliateUrl: {
             type: String,
             required: true,
             trim: true,
+            validate: {
+                validator: function (v) {
+                    return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(v);
+                },
+                message: props => `${props.value} is not a valid URL!`
+            }
         },
         price: {
             type: Number,

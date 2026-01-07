@@ -25,13 +25,12 @@ describe("Auth Middleware", () => {
       await authMiddleware.authenticateUser(req, res, next);
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
-        STATUS_CODE: 401,
-        STATUS: false,
-        MESSAGE: "Unauthorized: No token provided",
+        status: false,
+        message: "auth.no_token",
       });
     });
 
-    it("should return 401 if token is invalid", async () => {
+    it("should return 403 if token is invalid", async () => {
       req.header.mockReturnValue("Bearer invalidtoken");
       jwt.verify.mockImplementation(() => {
         throw new Error("Invalid token");
@@ -39,11 +38,10 @@ describe("Auth Middleware", () => {
 
       await authMiddleware.authenticateUser(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
-        STATUS_CODE: 401,
-        STATUS: false,
-        MESSAGE: "Unauthorized: Invalid token",
+        status: false,
+        message: "auth.invalid_token",
       });
     });
 
@@ -51,20 +49,21 @@ describe("Auth Middleware", () => {
       req.header.mockReturnValue("Bearer validtoken");
       jwt.verify.mockReturnValue({ id: "123" });
 
-      User.findById.mockResolvedValue({
-        _id: "123",
-        isEmailVerified: false,
-        email: "test@example.com",
+      User.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue({
+          _id: "123",
+          isEmailVerified: false,
+          email: "test@example.com",
+        }),
       });
 
       await authMiddleware.authenticateUser(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
-        STATUS_CODE: 403,
-        STATUS: false,
-        MESSAGE:
-          "Forbidden: Please verify your email before accessing this resource.",
+        status: false,
+        message:
+          "auth.verify_email",
       });
     });
 
@@ -72,10 +71,13 @@ describe("Auth Middleware", () => {
       req.header.mockReturnValue("Bearer validtoken");
       jwt.verify.mockReturnValue({ id: "123" });
 
-      User.findById.mockResolvedValue({
-        _id: "123",
-        isEmailVerified: true,
-        email: "test@example.com",
+      User.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue({
+          _id: "123",
+          isEmailVerified: true,
+          email: "test@example.com",
+          role: "user",
+        }),
       });
 
       await authMiddleware.authenticateUser(req, res, next);
@@ -93,9 +95,8 @@ describe("Auth Middleware", () => {
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
-        STATUS_CODE: 403,
-        STATUS: false,
-        MESSAGE: "Forbidden: Insufficient permissions",
+        status: false,
+        message: "You don't have permission to access this resource",
       });
     });
 

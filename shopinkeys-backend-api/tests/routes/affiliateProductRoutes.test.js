@@ -5,6 +5,7 @@ const AffiliateProduct = require("../../models/AffiliateProduct");
 const User = require("../../models/User");
 const jwt = require("jsonwebtoken");
 const envConfig = require("../../config/envConfig");
+const i18n = require("../../config/i18nConfig");
 
 describe("Affiliate Product Routes - Guest Access", () => {
     let testCollaborator;
@@ -347,8 +348,19 @@ describe("Affiliate Product Routes - Guest Access", () => {
 
             expect(res.status).toBe(400);
             expect(res.body.STATUS).toBe(false);
-            expect(res.body.MESSAGE).toBe("Validation failed");
-            expect(res.body.ERRORS).toBeDefined();
+            expect(res.body.MESSAGE).toBe(i18n.t("validation.failed"));
+            expect(res.body.ERRORS).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "title",
+                        message: "validation.affiliate.title_required",
+                    }),
+                    expect.objectContaining({
+                        field: "affiliateUrl",
+                        message: "validation.affiliate.url_required",
+                    }),
+                ])
+            );
         });
 
         it("should return 400 for invalid URL format", async () => {
@@ -361,11 +373,16 @@ describe("Affiliate Product Routes - Guest Access", () => {
                 });
 
             expect(res.status).toBe(400);
-            expect(res.body.ERRORS).toBeDefined();
-            const urlError = res.body.ERRORS.find(
-                (e) => e.field === "affiliateUrl"
+            expect(res.body.STATUS).toBe(false);
+            expect(res.body.MESSAGE).toBe(i18n.t("validation.failed"));
+            expect(res.body.ERRORS).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "affiliateUrl",
+                        message: "validation.affiliate.url_valid",
+                    }),
+                ])
             );
-            expect(urlError).toBeDefined();
         });
 
         it("should return 400 for negative price", async () => {
@@ -379,7 +396,17 @@ describe("Affiliate Product Routes - Guest Access", () => {
                 });
 
             expect(res.status).toBe(400);
-            expect(res.body.ERRORS).toBeDefined();
+            expect(res.body.STATUS).toBe(false);
+            expect(res.body.MESSAGE).toBe(i18n.t("validation.failed"));
+            expect(res.body.ERRORS).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "price",
+                        message: "validation.affiliate.price_positive",
+                    }),
+                ])
+            );
         });
     });
+
 });

@@ -1,0 +1,42 @@
+{
+    "errors": {
+        "unauthorized": "Ukungena okungagunyaziwe.",
+        "forbidden": "Awunayo imvume yokufinyelela kulo mthombo.",
+        "not_found": "Umthombo oceliwe awutholakali.",
+        "internal_server": "Kwenzeke iphutha elingalindelekile."
+    },
+    "validation": {
+        "failed": "Ukuqinisekisa kwehlulekile",
+        "affiliate": {
+            "title_required": "Isihloko siyadingeka",
+            "title_max": "Isihloko akumele sidlule izinhlamvu ezingu-200",
+            "image_url": "Isithombe kumele sibe yi-URL evumelekile",
+            "url_required": "I-URL ye-Affiliate iyadingeka",
+            "url_valid": "I-URL ye-Affiliate kumele ibe yi-URL evumelekile",
+            "url_protocol": "I-URL ye-Affiliate kumele iqale ngo-http:// noma https://",
+            "price_positive": "Intengo kumele ibe yinombolo enhle"
+        },
+        "share": {
+            "post_id_required": "I-ID yeposi iyadingeka",
+            "post_id_invalid": "I-ID yeposi kumele ibe yi-MongoDB ObjectId evumelekile",
+            "post_id_length": "I-ID yeposi kumele ibe nezinhlamvu ezingu-24",
+            "platforms_min": "Kudingeka okungenani ipulatifomu eyodwa",
+            "platforms_required": "Amapulatifomu ayadingeka"
+        },
+        "collaborator": {
+            "message_required": "Umlayezo wesicelo uyadingeka",
+            "message_min": "Umlayezo wesicelo kumele ube nezinhlamvu ezingu-50 okungenani",
+            "message_max": "Umlayezo wesicelo akumele udlule izinhlamvu ezingu-1000",
+            "niche_required": "I-niche iyadingeka"
+        },
+        "blog": {
+            "title_required": "Isihloko siyadingeka",
+            "title_min": "Isihloko kumele sibe nezinhlamvu ezingu-10 okungenani",
+            "title_max": "Isihloko akumele sidlule izinhlamvu ezingu-200",
+            "content_required": "Okuqukethwe kuyadingeka",
+            "content_min": "Okuqukethwe kumele kube nezinhlamvu ezingu-100 okungenani",
+            "meta_title_max": "Isihloko se-meta akumele sidlule izinhlamvu ezingu-60 ukuze i-SEO ibe ngcono",
+            "meta_description_max": "Incazelo ye-meta akumele idlule izinhlamvu ezingu-155 ukuze i-SEO ibe ngcono"
+        }
+    }
+}
