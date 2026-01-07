@@ -1,0 +1,42 @@
+{
+  "errors": {
+    "unauthorized": "Acceso no autorizado.",
+    "forbidden": "No tienes permiso para acceder a este recurso.",
+    "not_found": "El recurso solicitado no fue encontrado.",
+    "internal_server": "Ocurrió un error inesperado."
+  },
+  "validation": {
+    "failed": "Validación fallida",
+    "affiliate": {
+      "title_required": "El título es obligatorio",
+      "title_max": "El título no debe exceder 200 caracteres",
+      "image_url": "La imagen debe ser una URL válida",
+      "url_required": "La URL del afiliado es obligatoria",
+      "url_valid": "La URL del afiliado debe ser válida",
+      "url_protocol": "La URL del afiliado debe comenzar con http:// o https://",
+      "price_positive": "El precio debe ser un número positivo"
+    },
+    "share": {
+      "post_id_required": "El ID de la publicación es obligatorio",
+      "post_id_invalid": "El ID de la publicación debe ser un ObjectId válido de MongoDB",
+      "post_id_length": "El ID de la publicación debe tener 24 caracteres",
+      "platforms_min": "Se requiere al menos una plataforma",
+      "platforms_required": "Las plataformas son obligatorias"
+    },
+    "collaborator": {
+      "message_required": "El mensaje de la solicitud es obligatorio",
+      "message_min": "El mensaje de la solicitud debe tener al menos 50 caracteres",
+      "message_max": "El mensaje de la solicitud no debe exceder 1000 caracteres",
+      "niche_required": "El nicho es obligatorio"
+    },
+    "blog": {
+      "title_required": "El título es obligatorio",
+      "title_min": "El título debe tener al menos 10 caracteres",
+      "title_max": "El título no debe exceder 200 caracteres",
+      "content_required": "El contenido es obligatorio",
+      "content_min": "El contenido debe tener al menos 100 caracteres",
+      "meta_title_max": "El meta título no debe exceder 60 caracteres para un SEO óptimo",
+      "meta_description_max": "La meta descripción no debe exceder 155 caracteres para un SEO óptimo"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "errors": {
+    "unauthorized": "허가되지 않은 접근입니다.",
+    "forbidden": "이 리소스에 접근할 권한이 없습니다.",
+    "not_found": "요청한 리소스를 찾을 수 없습니다.",
+    "internal_server": "예기치 않은 오류가 발생했습니다."
+  },
+  "validation": {
+    "failed": "검증에 실패했습니다.",
+    "affiliate": {
+      "title_required": "제목이 필요합니다.",
+      "title_max": "제목은 200자를 초과할 수 없습니다.",
+      "image_url": "이미지는 유효한 URL이어야 합니다.",
+      "url_required": "제휴 URL이 필요합니다.",
+      "url_valid": "제휴 URL은 유효한 URL이어야 합니다.",
+      "url_protocol": "제휴 URL은 http:// 또는 https://로 시작해야 합니다.",
+      "price_positive": "가격은 양수여야 합니다."
+    },
+    "share": {
+      "post_id_required": "게시물 ID가 필요합니다.",
+      "post_id_invalid": "게시물 ID는 유효한 MongoDB ObjectId여야 합니다.",
+      "post_id_length": "게시물 ID는 24자여야 합니다.",
+      "platforms_min": "최소 하나의 플랫폼이 필요합니다.",
+      "platforms_required": "플랫폼이 필요합니다."
+    },
+    "collaborator": {
+      "message_required": "요청 메시지가 필요합니다.",
+      "message_min": "요청 메시지는 최소 50자 이상이어야 합니다.",
+      "message_max": "요청 메시지는 1000자를 초과할 수 없습니다.",
+      "niche_required": "니치가 필요합니다."
+    },
+    "blog": {
+      "title_required": "제목이 필요합니다.",
+      "title_min": "제목은 최소 10자 이상이어야 합니다.",
+      "title_max": "제목은 200자를 초과할 수 없습니다.",
+      "content_required": "내용이 필요합니다.",
+      "content_min": "내용은 최소 100자 이상이어야 합니다.",
+      "meta_title_max": "메타 제목은 SEO 최적화를 위해 60자를 초과할 수 없습니다.",
+      "meta_description_max": "메타 설명은 SEO 최적화를 위해 155자를 초과할 수 없습니다."
+    }
+  }
+}

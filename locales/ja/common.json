@@ -1,0 +1,42 @@
+{
+  "errors": {
+    "unauthorized": "許可されていないアクセスです。",
+    "forbidden": "このリソースにアクセスする権限がありません。",
+    "not_found": "要求されたリソースが見つかりません。",
+    "internal_server": "予期しないエラーが発生しました。"
+  },
+  "validation": {
+    "failed": "検証に失敗しました",
+    "affiliate": {
+      "title_required": "タイトルは必須です",
+      "title_max": "タイトルは200文字を超えてはいけません",
+      "image_url": "画像は有効なURLである必要があります",
+      "url_required": "アフィリエイトURLは必須です",
+      "url_valid": "アフィリエイトURLは有効なURLである必要があります",
+      "url_protocol": "アフィリエイトURLは http:// または https:// で始まる必要があります",
+      "price_positive": "価格は正の数でなければなりません"
+    },
+    "share": {
+      "post_id_required": "投稿IDは必須です",
+      "post_id_invalid": "投稿IDは有効なMongoDB ObjectIdである必要があります",
+      "post_id_length": "投稿IDは24文字である必要があります",
+      "platforms_min": "少なくとも1つのプラットフォームが必要です",
+      "platforms_required": "プラットフォームは必須です"
+    },
+    "collaborator": {
+      "message_required": "リクエストメッセージは必須です",
+      "message_min": "リクエストメッセージは50文字以上である必要があります",
+      "message_max": "リクエストメッセージは1000文字を超えてはいけません",
+      "niche_required": "ニッチは必須です"
+    },
+    "blog": {
+      "title_required": "タイトルは必須です",
+      "title_min": "タイトルは10文字以上である必要があります",
+      "title_max": "タイトルは200文字を超えてはいけません",
+      "content_required": "コンテンツは必須です",
+      "content_min": "コンテンツは100文字以上である必要があります",
+      "meta_title_max": "メタタイトルはSEO最適化のため60文字を超えてはいけません",
+      "meta_description_max": "メタディスクリプションはSEO最適化のため155文字を超えてはいけません"
+    }
+  }
+}

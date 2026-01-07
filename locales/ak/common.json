@@ -1,0 +1,42 @@
+{
+    "errors": {
+        "unauthorized": "Wo nni kwan a wode betumi akɔ mu.",
+        "forbidden": "Wo nni ho kwan sɛ wubenya akɔdeɛ yi so.",
+        "not_found": "Enhu adeɛ a worehwehwɛ no.",
+        "internal_server": "Mfomsoɔ bi a na yennhwɛ anim asi."
+    },
+    "validation": {
+        "failed": "Nsɛnhyɛsoɔ no anni mu",
+        "affiliate": {
+            "title_required": "Asɛmti no ho hia",
+            "title_max": "Ɛnsɛ sɛ asɛmti no tra akyɛdeɛ 200",
+            "image_url": "Ɛsɛ sɛ mfonini no yɛ URL a ɛyɛ nokware",
+            "url_required": "Affiliate URL no ho hia",
+            "url_valid": "Affiliate URL no gyina sɛ URL a ɛyɛ nokware",
+            "url_protocol": "Ɛsɛ sɛ Affiliate URL no fi http:// anaa https:// ase",
+            "price_positive": "Ɛsɛ sɛ boɔ no yɛ akyɛdeɛ a ɛso kɔ soro"
+        },
+        "share": {
+            "post_id_required": "Post ID no ho hia",
+            "post_id_invalid": "Ɛsɛ sɛ Post ID no yɛ MongoDB ObjectId a ɛyɛ nokware",
+            "post_id_length": "Ɛsɛ sɛ Post ID no wɔ akyɛdeɛ 24",
+            "platforms_min": "Ɛsɛ sɛ wobɛpaw platform baako kɛseɛ",
+            "platforms_required": "Platforms no ho hia"
+        },
+        "collaborator": {
+            "message_required": "Abisadeɛ krataa no ho hia",
+            "message_min": "Ɛsɛ sɛ abisadeɛ krataa no wɔ akyɛdeɛ 50 kɛseɛ",
+            "message_max": "Ɛnsɛ sɛ abisadeɛ krataa no tra akyɛdeɛ 1000",
+            "niche_required": "Niche no ho hia"
+        },
+        "blog": {
+            "title_required": "Asɛmti no ho hia",
+            "title_min": "Ɛsɛ sɛ asɛmti no wɔ akyɛdeɛ 10 kɛseɛ",
+            "title_max": "Ɛnsɛ sɛ asɛmti no tra akyɛdeɛ 200",
+            "content_required": "Nsɛm a wɔakyerɛw no ho hia",
+            "content_min": "Ɛsɛ sɛ nsɛm no wɔ akyɛdeɛ 100 kɛseɛ",
+            "meta_title_max": "Ɛnsɛ sɛ meta asɛmti no tra akyɛdeɛ 60 de ayɛ SEO pa",
+            "meta_description_max": "Ɛnsɛ sɛ meta asɛmkyerɛmu no tra akyɛdeɛ 155 de ayɛ SEO pa"
+        }
+    }
+}

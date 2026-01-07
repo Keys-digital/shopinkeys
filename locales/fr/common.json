@@ -1,0 +1,42 @@
+{
+  "errors": {
+    "unauthorized": "Accès non autorisé.",
+    "forbidden": "Vous n'avez pas la permission d'accéder à cette ressource.",
+    "not_found": "La ressource demandée est introuvable.",
+    "internal_server": "Une erreur inattendue s'est produite."
+  },
+  "validation": {
+    "failed": "Échec de la validation",
+    "affiliate": {
+      "title_required": "Le titre est requis",
+      "title_max": "Le titre ne doit pas dépasser 200 caractères",
+      "image_url": "L'image doit être une URL valide",
+      "url_required": "L'URL de l'affilié est requise",
+      "url_valid": "L'URL de l'affilié doit être une URL valide",
+      "url_protocol": "L'URL de l'affilié doit commencer par http:// ou https://",
+      "price_positive": "Le prix doit être un nombre positif"
+    },
+    "share": {
+      "post_id_required": "L'identifiant de la publication est requis",
+      "post_id_invalid": "L'identifiant de la publication doit être un ObjectId MongoDB valide",
+      "post_id_length": "L'identifiant de la publication doit comporter 24 caractères",
+      "platforms_min": "Au moins une plateforme est requise",
+      "platforms_required": "Les plateformes sont requises"
+    },
+    "collaborator": {
+      "message_required": "Le message de demande est requis",
+      "message_min": "Le message de demande doit comporter au moins 50 caractères",
+      "message_max": "Le message de demande ne doit pas dépasser 1000 caractères",
+      "niche_required": "La niche est requise"
+    },
+    "blog": {
+      "title_required": "Le titre est requis",
+      "title_min": "Le titre doit comporter au moins 10 caractères",
+      "title_max": "Le titre ne doit pas dépasser 200 caractères",
+      "content_required": "Le contenu est requis",
+      "content_min": "Le contenu doit comporter au moins 100 caractères",
+      "meta_title_max": "Le méta-titre ne doit pas dépasser 60 caractères pour un SEO optimal",
+      "meta_description_max": "La méta-description ne doit pas dépasser 155 caractères pour un SEO optimal"
+    }
+  }
+}

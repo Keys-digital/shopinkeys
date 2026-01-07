@@ -1,0 +1,42 @@
+{
+  "errors": {
+    "unauthorized": "未經授權的存取。",
+    "forbidden": "您沒有權限存取此資源。",
+    "not_found": "找不到請求的資源。",
+    "internal_server": "發生未預期的錯誤。"
+  },
+  "validation": {
+    "failed": "驗證失敗",
+    "affiliate": {
+      "title_required": "標題為必填項目",
+      "title_max": "標題不得超過 200 個字元",
+      "image_url": "圖片必須是有效的 URL",
+      "url_required": "聯盟連結為必填項目",
+      "url_valid": "聯盟連結必須是有效的 URL",
+      "url_protocol": "聯盟連結必須以 http:// 或 https:// 開頭",
+      "price_positive": "價格必須為正數"
+    },
+    "share": {
+      "post_id_required": "貼文 ID 為必填項目",
+      "post_id_invalid": "貼文 ID 必須是有效的 MongoDB ObjectId",
+      "post_id_length": "貼文 ID 必須為 24 個字元",
+      "platforms_min": "至少需要選擇一個平台",
+      "platforms_required": "平台為必填項目"
+    },
+    "collaborator": {
+      "message_required": "請求訊息為必填項目",
+      "message_min": "請求訊息至少需要 50 個字元",
+      "message_max": "請求訊息不得超過 1000 個字元",
+      "niche_required": "領域為必填項目"
+    },
+    "blog": {
+      "title_required": "標題為必填項目",
+      "title_min": "標題至少需要 10 個字元",
+      "title_max": "標題不得超過 200 個字元",
+      "content_required": "內容為必填項目",
+      "content_min": "內容至少需要 100 個字元",
+      "meta_title_max": "為獲得最佳 SEO 效果，Meta 標題不得超過 60 個字元",
+      "meta_description_max": "為獲得最佳 SEO 效果，Meta 描述不得超過 155 個字元"
+    }
+  }
+}

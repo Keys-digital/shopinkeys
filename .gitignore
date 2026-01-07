@@ -1,0 +1,67 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.production
+.env.test
+
+# Ignore logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+
+# Build output
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Miscellaneous
+*.sublime-workspace
+
+# Ignore createAdmin script
+scripts/createAdmin.js
+
+# Ignore tests utils
+tests/utils/*
+
+ Mongo / test binaries
+.mongodb-binaries/
+
+# Test output artifacts
+test-dedup-fail.txt
+test-output-queue.txt
+test_failure.txt
+
+# Local debug / investigation files
+debug-post.js
+debug-redis-conn.js
+debug-test.js
+detailed_test_output.txt
+test-output.txt
+verify-i18n-script.js
+
+node_modules
+

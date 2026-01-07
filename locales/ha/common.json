@@ -1,0 +1,42 @@
+{
+    "errors": {
+        "unauthorized": "Ba a ba da izinin shiga ba.",
+        "forbidden": "Ba ku da izinin samun wannan albarkatun.",
+        "not_found": "Ba a samo albarkatun da aka nema ba.",
+        "internal_server": "An sami kuskure mara tsammani."
+    },
+    "validation": {
+        "failed": "Bincike ya gaza",
+        "affiliate": {
+            "title_required": "Ana buƙatar take",
+            "title_max": "Take bai kamata ya wuce haruffa 200 ba",
+            "image_url": "Hoto dole ne ya zama ingantaccen URL",
+            "url_required": "Ana buƙatar URL na haɗin gwiwa",
+            "url_valid": "URL na haɗin gwiwa dole ne ya zama ingantaccen URL",
+            "url_protocol": "URL na haɗin gwiwa dole ne ya fara da http:// ko https://",
+            "price_positive": "Farashi dole ne ya zama lamba mai kyau"
+        },
+        "share": {
+            "post_id_required": "Ana buƙatar ID na post",
+            "post_id_invalid": "ID na post dole ne ya zama ingantaccen MongoDB ObjectId",
+            "post_id_length": "ID na post dole ne ya kasance haruffa 24",
+            "platforms_min": "Aƙalla dandalin ɗaya ana buƙata",
+            "platforms_required": "Ana buƙatar dandali"
+        },
+        "collaborator": {
+            "message_required": "Ana buƙatar saƙon buƙata",
+            "message_min": "Saƙon buƙata dole ne ya kasance akalla haruffa 50",
+            "message_max": "Saƙon buƙata bai kamata ya wuce haruffa 1000 ba",
+            "niche_required": "Ana buƙatar niche"
+        },
+        "blog": {
+            "title_required": "Ana buƙatar take",
+            "title_min": "Take dole ne ya kasance akalla haruffa 10",
+            "title_max": "Take bai kamata ya wuce haruffa 200 ba",
+            "content_required": "Ana buƙatar abun ciki",
+            "content_min": "Abun ciki dole ne ya kasance akalla haruffa 100",
+            "meta_title_max": "Meta take bai kamata ya wuce haruffa 60 don SEO mafi kyau ba",
+            "meta_description_max": "Meta description bai kamata ya wuce haruffa 155 don SEO mafi kyau ba"
+        }
+    }
+}

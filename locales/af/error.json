@@ -1,0 +1,7 @@
+{
+    "unauthorized": "Ongemagtigde toegang.",
+    "forbidden": "Jy het nie toestemming om toegang tot hierdie hulpbron te verkry nie.",
+    "not_found": "Die versoekte hulpbron is nie gevind nie.",
+    "internal_server": "’n Onverwagte fout het voorgekom.",
+    "bad_request": "Ongeldige versoek."
+}
