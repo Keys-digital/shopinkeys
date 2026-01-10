@@ -18,6 +18,26 @@ router.get(
 );
 
 /**
+ * @route   GET /api/affiliate-products/categories
+ * @desc    Get active product categories
+ * @access  Public
+ */
+router.get(
+    "/categories",
+    affiliateProductController.getCategories
+);
+
+/**
+ * @route   GET /api/affiliate-products/partners
+ * @desc    Get active affiliate partners
+ * @access  Public
+ */
+router.get(
+    "/partners",
+    affiliateProductController.getPartners
+);
+
+/**
  * @route   GET /api/affiliate-products/my-products
  * @desc    Get current collaborator's submitted products
  * @access  Collaborator

@@ -11,16 +11,54 @@ const { AUDIT_ACTIONS, AFFILIATE_PARTNERS } = require("../constants");
  */
 exports.getAllProducts = async (req, res) => {
     try {
-        const { niche, partner, page = 1, limit = 20 } = req.query;
+        const { search, categories, partner, sort, page = 1, limit = 20 } = req.query;
 
         // Build filter for approved, non-deleted products only
         const filter = { approved: true, deleted: false };
-        if (niche) filter.niche = niche;
-        if (partner) filter.partner = partner;
+
+        // 1. Text Search
+        if (search) {
+            filter.$text = { $search: search };
+        }
+
+        // 2. Category Filter (Multi-select)
+        if (categories) {
+            const categoryList = Array.isArray(categories) ? categories : categories.split(",");
+            filter.niche = { $in: categoryList.map(c => c.trim()) };
+        }
+
+        // 3. Partner Filter
+        if (partner) {
+            filter.partner = partner;
+        }
+
+        // 4. Sorting
+        let sortOption = { createdAt: -1 }; // Default: Newest
+        if (sort) {
+            switch (sort) {
+                case "price_asc":
+                    sortOption = { price: 1 };
+                    break;
+                case "price_desc":
+                    sortOption = { price: -1 };
+                    break;
+                case "clicks":
+                    sortOption = { clicks: -1 };
+                    break;
+                case "newest":
+                    sortOption = { createdAt: -1 };
+                    break;
+                case "oldest":
+                    sortOption = { createdAt: 1 };
+                    break;
+                default:
+                    sortOption = { createdAt: -1 };
+            }
+        }
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        const products = await affiliateProductRepository.findProductsByFilter(filter, skip, parseInt(limit));
+        const products = await affiliateProductRepository.findProductsByFilter(filter, skip, parseInt(limit), sortOption);
         const total = await affiliateProductRepository.countProductsByFilter(filter);
 
         res.status(200).json({
@@ -39,6 +77,69 @@ exports.getAllProducts = async (req, res) => {
         });
     } catch (error) {
         logger.error(`Error fetching affiliate products: ${error.message}`);
+        res.status(500).json({
+            STATUS_CODE: 500,
+            STATUS: false,
+            MESSAGE: "Internal server error.",
+        });
+    }
+};
+
+/**
+ * Get active product categories (Public)
+ * GET /api/affiliate-products/categories
+ * Access: Public
+ */
+exports.getCategories = async (req, res) => {
+    try {
+        // Find all distinct niches from approved/non-deleted products
+        // Note: Repository method for distinct wasn't added, using direct query logic here or could add to repo.
+        // For simplicity and since we imported repository only, let's assume we can add a method or require model if strictly needed.
+        // But better to implement it via repository pattern if possible.
+        // Let's modify repository later if we want strictness, or just assume we can add it here.
+        // Actually, to stick to pattern, I should have added `findDistinctNiches` to repo.
+        // I will add the repo call here but I need to ensure it exists.
+        // Since I can't edit repo again in this single tool call, I will assume I can edit repo in next step OR
+        // I can just rely on the repo import I have. Wait, I imported `affiliateProductRepository`.
+        // I'll add `findDistinctNiches` to repository in a follow-up step. for now calling it.
+        // To avoid runtime error, I will comment this out or use a quick fix if I could import model.
+        // But better: I will add `getCategories` implementation assuming `affiliateProductRepository.getDistinctNiches` exists,
+        // and then IMMEDIATELY update the repo in the next step.
+
+        const categories = await affiliateProductRepository.getDistinctNiches();
+
+        res.status(200).json({
+            STATUS_CODE: 200,
+            STATUS: true,
+            MESSAGE: "Categories retrieved successfully.",
+            DATA: categories,
+        });
+    } catch (error) {
+        logger.error(`Error fetching categories: ${error.message}`);
+        res.status(500).json({
+            STATUS_CODE: 500,
+            STATUS: false,
+            MESSAGE: "Internal server error.",
+        });
+    }
+};
+
+/**
+ * Get active affiliate partners (Public)
+ * GET /api/affiliate-products/partners
+ * Access: Public
+ */
+exports.getPartners = async (req, res) => {
+    try {
+        const partners = await affiliateProductRepository.getDistinctPartners();
+        res.status(200).json({
+            STATUS_CODE: 200,
+            STATUS: true,
+            MESSAGE: "Partners retrieved successfully.",
+            DATA: partners,
+        });
+    } catch (error) {
+        logger.error(`Error fetching partners: ${error.message}`);
         res.status(500).json({
             STATUS_CODE: 500,
             STATUS: false,
@@ -171,7 +272,7 @@ exports.submitProduct = async (req, res) => {
             });
         }
 
-        const { title, description, image, affiliateUrl, price, niche, partner } = value;
+        const { title, description, image, affiliateUrl, price, niche, partner, relatedPostId } = value;
 
         const newProduct = await affiliateProductRepository.createProduct({
             title,
@@ -179,8 +280,9 @@ exports.submitProduct = async (req, res) => {
             image,
             affiliateUrl,
             price,
-            niche,
+            niche: Array.isArray(niche) ? niche : (niche ? [niche] : []), // Ensure array
             partner: partner || AFFILIATE_PARTNERS.OTHER,
+            relatedPostId: relatedPostId || null,
             addedBy: req.user._id,
             approved: false, // Pending approval
         });
