@@ -38,16 +38,20 @@ const affiliateProductSchema = new mongoose.Schema(
             type: Number,
             min: 0,
         },
-        niche: {
+        niche: [{
             type: String,
             trim: true,
-            index: true, // For filtering by niche
-        },
+        }],
         partner: {
             type: String,
             enum: ["Amazon", "Jumia", "Temu", "ClickBank", "Other"],
             default: "Other",
             index: true, // For filtering by partner
+        },
+        relatedPostId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "BlogPost",
+            index: true,
         },
         addedBy: {
             type: mongoose.Schema.Types.ObjectId,
@@ -119,5 +123,8 @@ affiliateProductSchema.index({ addedBy: 1, createdAt: -1 });
 
 // Index for filtering by niche and partner
 affiliateProductSchema.index({ niche: 1, partner: 1, approved: 1 });
+
+// Text index for search
+affiliateProductSchema.index({ title: "text", description: "text" });
 
 module.exports = mongoose.model("AffiliateProduct", affiliateProductSchema);

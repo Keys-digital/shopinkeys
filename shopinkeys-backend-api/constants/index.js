@@ -41,11 +41,28 @@ module.exports = {
     /**
      * Affiliate Partners
      */
+    /**
+     * Affiliate Partners
+     * Product-level affiliate networks (data-driven)
+     */
     AFFILIATE_PARTNERS: {
         AMAZON: "Amazon",
         JUMIA: "Jumia",
         TEMU: "Temu",
         CLICKBANK: "ClickBank",
+        OTHER: "Other",
+    },
+
+    /**
+     * Branding / Integration Platforms
+     * Branding / integration platforms (UI-driven) - Logic only, not product sources
+     */
+    PLATFORMS: {
+        VOLTTHREAD: "VoltThread",
+        SHOPIFY: "Shopify",
+        TIKTOK: "TikTok",
+        PRINTIFY: "Printify",
+        EBAY: "eBay",
         OTHER: "Other",
     },
 

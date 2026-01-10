@@ -89,6 +89,41 @@ const blogPostSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        isFeatured: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
+        isTrending: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
+        ctas: [{
+            type: {
+                type: String, // e.g., "button", "link", "banner"
+                default: "button",
+            },
+            text: {
+                type: String,
+                trim: true,
+            },
+            url: {
+                type: String,
+                trim: true,
+            },
+            placement: {
+                type: String, // e.g., "top", "bottom", "inline"
+                default: "bottom",
+            },
+            style: {
+                type: String, // e.g., "primary", "secondary"
+            },
+            affiliateLink: { // Actual tracked link if different from url
+                type: String,
+                trim: true,
+            }
+        }],
     },
     { timestamps: true }
 );

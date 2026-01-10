@@ -51,17 +51,18 @@ tests/utils/*
 .mongodb-binaries/
 
 # Test output artifacts
-test-dedup-fail.txt
+test-output.txt
 test-output-queue.txt
-test_failure.txt
+test-failure.txt
+test-dedup-fail.txt
 
 # Local debug / investigation files
 debug-post.js
 debug-redis-conn.js
 debug-test.js
-detailed_test_output.txt
-test-output.txt
+verify-cms.js
 verify-i18n-script.js
+verify-schema.js
 
 node_modules
 

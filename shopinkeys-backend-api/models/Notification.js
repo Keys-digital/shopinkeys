@@ -17,6 +17,7 @@ const notificationSchema = new mongoose.Schema(
                 "share_request_approved",
                 "post_approved",
                 "post_rejected",
+                "post_submitted",
                 "promotion_initiated",
                 "promotion_accepted",
                 "promotion_declined",

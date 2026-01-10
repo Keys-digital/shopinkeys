@@ -39,6 +39,7 @@ app.use("/api/collaborator", authApiLimiter, require("./routes/collaboratorRoute
 app.use("/api/blog-posts", publicApiLimiter, require("./routes/blogPostRoutes"));
 app.use("/api/share-requests", authApiLimiter, require("./routes/shareRequestRoutes"));
 app.use("/api/notifications", authApiLimiter, require("./routes/notificationRoutes"));
+app.use("/api/public", publicApiLimiter, require("./routes/publicRoutes"));
 app.use("/api/affiliate-products", publicApiLimiter, require("./routes/affiliateProductRoutes"));
 
 

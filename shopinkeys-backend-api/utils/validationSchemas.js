@@ -19,10 +19,14 @@ exports.submitProductSchema = Joi.object({
     price: Joi.number().min(0).allow(null).messages({
         "number.min": "validation.affiliate.price_positive"
     }),
-    niche: Joi.string().trim().allow(""),
+    niche: Joi.alternatives().try(
+        Joi.array().items(Joi.string().trim()),
+        Joi.string().trim()
+    ).allow(null, ""), // Allow array or single string
     partner: Joi.string()
         .valid(...Object.values(AFFILIATE_PARTNERS))
         .default(AFFILIATE_PARTNERS.OTHER),
+    relatedPostId: Joi.string().hex().length(24).allow("").optional(), // MongoDB ObjectId
 });
 
 exports.updateProductSchema = Joi.object({
@@ -31,8 +35,12 @@ exports.updateProductSchema = Joi.object({
     image: Joi.string().uri(),
     affiliateUrl: Joi.string().uri(),
     price: Joi.number().min(0),
-    niche: Joi.string().trim(),
+    niche: Joi.alternatives().try(
+        Joi.array().items(Joi.string().trim()),
+        Joi.string().trim()
+    ),
     partner: Joi.string().valid(...Object.values(AFFILIATE_PARTNERS)),
+    relatedPostId: Joi.string().hex().length(24).allow("").optional(),
 }).min(1);
 
 // Blog Post Schemas
@@ -84,6 +92,16 @@ exports.createPostSchema = Joi.object({
         }),
     type: Joi.string().valid("seo", "news", "tutorial"), // For auto-approve check
     mainKeyword: Joi.string().allow(""),
+    ctas: Joi.array().items(
+        Joi.object({
+            type: Joi.string().valid("button", "link", "banner"),
+            text: Joi.string().required(),
+            url: Joi.string().uri().required(),
+            placement: Joi.string(),
+            style: Joi.string(),
+            affiliateLink: Joi.string().uri()
+        })
+    ),
 
 });
 
@@ -114,6 +132,16 @@ exports.updatePostSchema = Joi.object({
                 "string.uri": "validation.blog.media_url_valid"
             }),
             caption: Joi.string(),
+        })
+    ),
+    ctas: Joi.array().items(
+        Joi.object({
+            type: Joi.string().valid("button", "link", "banner"),
+            text: Joi.string(),
+            url: Joi.string().uri(),
+            placement: Joi.string(),
+            style: Joi.string(),
+            affiliateLink: Joi.string().uri()
         })
     ),
     tags: Joi.alternatives().try(Joi.array().items(Joi.string().trim()), Joi.string().trim()).messages({
